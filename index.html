@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MFT Automation Studio &mdash; Southern California Edison</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+
+<body>
+  <!-- ===================== LOGIN ===================== -->
+  <div id="login" class="login">
+    <div class="login-left">
+      <div class="login-brandband">
+        <img class="login-logo" src="assets/sce-logo.svg" alt="Southern California Edison" />
+      </div>
+      <div class="login-hero">
+        <h1>MFT Automation Studio</h1>
+        <p>Generate IBM Sterling Integrator business processes, import XML and XSLT
+          configuration blocks &mdash; consistently, in minutes.</p>
+        <ul class="login-points">
+          <li>Standardised MB&nbsp;&rarr;&nbsp;FS artefacts</li>
+          <li>Dynamic, dated mailbox patterns</li>
+          <li>One-click package export</li>
+        </ul>
+      </div>
+      <div class="login-foot">&copy; Southern California Edison &bull; Internal tool</div>
+    </div>
+
+    <div class="login-right">
+      <form id="login-form" class="login-card" autocomplete="off">
+        <h2>Sign in</h2>
+        <p class="muted small">Use your enterprise credentials to continue.</p>
+
+        <label class="field">
+          <span class="flabel">User ID</span>
+          <input class="in" id="login-user" type="text" placeholder="e.g. jsmith" required />
+        </label>
+        <label class="field">
+          <span class="flabel">Password</span>
+          <input class="in" id="login-pass" type="password"
+            placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" required />
+        </label>
+
+        <label class="chk remember">
+          <input type="checkbox" id="login-remember" checked />
+          <span>Keep me signed in on this device</span>
+        </label>
+
+        <div id="login-error" class="al e" style="display:none"></div>
+
+        <button type="submit" class="btn primary block">Sign in</button>
+        <p class="muted small login-help">First time? Sign in as <strong>admin</strong> / <strong>admin</strong>, then add users under Access accounts.</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================== APP ===================== -->
+  <div class="shell" id="shell" style="display:none">
+    <aside class="sidebar">
+      <div class="brand">
+        <img class="brand-logo" src="assets/sce-logo.svg" alt="Southern California Edison" />
+      </div>
+
+      <nav class="sidenav">
+        <div class="navgroup">
+          <div class="navgroup-title">Workspace</div>
+          <a href="#" id="nav-home" class="navitem">
+            <span class="navicon">&#9632;</span><span>Home</span>
+          </a>
+          <a href="#" id="nav-templates" class="navitem">
+            <span class="navicon">&#9783;</span><span>Templates</span>
+          </a>
+        </div>
+        <div class="navgroup">
+          <div class="navgroup-title">Tools</div>
+          <a href="#" id="nav-import" class="navitem">
+            <span class="navicon">&#8681;</span><span>Import XSLT block</span>
+          </a>
+          <a href="#" id="nav-analysis" class="navitem">
+            <span class="navicon">&#9776;</span><span>Mailbox analysis</span>
+          </a>
+          <a href="#" id="nav-selftest" class="navitem">
+            <span class="navicon">&#10003;</span><span>Run self-test</span>
+          </a>
+        </div>
+        <div class="navgroup" id="navgroup-admin" style="display:none">
+          <div class="navgroup-title">Administration</div>
+          <a href="#" id="nav-accounts" class="navitem">
+            <span class="navicon">&#128100;</span><span>Access accounts</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidefoot">
+        <div class="userchip">
+          <span class="avatar" id="user-avatar">U</span>
+          <div class="userinfo">
+            <strong id="user-name">User</strong>
+            <span class="muted small">Signed in</span>
+          </div>
+        </div>
+        <button class="btn block ghost" id="logout-btn">Sign out</button>
+        <div class="muted small ver">v1.0 &bull; local-only</div>
+      </div>
+    </aside>
+
+    <div class="workarea">
+      <header class="topbar">
+        <div class="pagetitle">
+          <h1 id="page-title">Integrations</h1>
+          <p class="muted small" id="page-sub">Generate Sterling Integrator artefacts from a form.</p>
+        </div>
+      </header>
+      <main id="view"></main>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <div id="modal" class="modal"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="js/templates.js"></script>
+  <script src="js/golden.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>

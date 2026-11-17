@@ -1,0 +1,58 @@
+=== BP: SCE_SFTPGET_Dovetail_Case_Management_Master_Raw_Data_to_HRCM ===
+(calls SCE_Generic_SFTPGet, errors spawn SCE_Generic_EMailOnError)
+
+=== SCE_Generic_SFTPGet_Config.xslt block ===
+<SYSTEM name="Dovetail_Case_Management_Master_Raw_Data_to_HRCM">
+		<process_info>
+			<beginsession>
+				<ProfileId>873135190f1c973bdnode1</ProfileId>
+				<SFTPClientAdapterName>SCE_SFTP_CLIENT_DMZ1_GROUP</SFTPClientAdapterName>
+			</beginsession>
+			<changedir>
+				<Directory>/exports/dataextracts/case_management_master_raw_data</Directory>
+			</changedir>
+			<RemoteFileName>sce_case_management_master_raw_data*.zip</RemoteFileName>									
+			<DeleteRemoteFile>Yes</DeleteRemoteFile>
+			<ArchiveFlag>Yes</ArchiveFlag>
+			<AddArchiveTimeStamp>No</AddArchiveTimeStamp>
+			<ArchivePath>/mft/archive/General/HRCM/Inbound</ArchivePath> 
+			<InboundFileExtn>unknown</InboundFileExtn>
+			<PGPUnPackFlag>No</PGPUnPackFlag>
+			<PGPExtn></PGPExtn>
+			<KeyMapName></KeyMapName>
+			<FileDestinationName>FS</FileDestinationName>
+			<AddTargetTimeStamp>No</AddTargetTimeStamp>
+			<TargetFileName>unknown</TargetFileName>
+			<TargetFileCheck>No</TargetFileCheck>
+			<TargetFileExtn>unknown</TargetFileExtn>
+			<TargetFilePath>/mft_HRCM/AnalyticsData</TargetFilePath>
+			<ExtractableCount></ExtractableCount>
+			<SendEmail>No</SendEmail>
+			<SendArchiveInfo></SendArchiveInfo>
+ 		</process_info>
+</SYSTEM>
+
+=== SCE_Generic_Error_Email_List block ===
+<ERRORMAIL name="SCE_SFTPGET_Dovetail_Case_Management_Master_Raw_Data_to_HRCM">
+		<email_info>
+			<mail-format>HTML</mail-format>
+			<mail-mime-sender>scemftprod@sce.com</mail-mime-sender>
+			<mail-mime-recipient>ManagedServicesMFTSupport@sce.com</mail-mime-recipient>
+			<mail-mime-cc></mail-mime-cc>
+			<mail-mime-subject>SCE_SFTPGET_Dovetail_Case_Management_Master_Raw_Data_to_HRCM - Failed</mail-mime-subject>
+		</email_info>
+</ERRORMAIL>
+
+=== SCE_Generic_Email_List_Config block ===
+<PROCNAME name="SCE_SFTPGET_Dovetail_Case_Management_Master_Raw_Data_to_HRCM">
+		<EMailNotificationXSLT>SCE_Generic_SFTPGet_SuccessEmailBodyWithArchiveInf</EMailNotificationXSLT>
+		<mail_info>
+			<MailFlag>No</MailFlag>
+			<SendArchiveInfo></SendArchiveInfo>
+			<MailFormat>TEXT</MailFormat>
+			<mail-mime-sender>scemftprod@sce.com</mail-mime-sender>
+			<mail-mime-recipient>scemftprod@sce.com</mail-mime-recipient>
+			<mail-mime-cc></mail-mime-cc>
+			<mail-mime-subject>SCE_SFTPGET_Dovetail_Case_Management_Master_Raw_Data_to_HRCM</mail-mime-subject>
+		</mail_info>
+		</PROCNAME>

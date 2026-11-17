@@ -1,0 +1,12 @@
+<PROCNAME name="{{ProcessName}}">
+		<EMailNotificationXSLT>{{EMailNotificationXSLT}}</EMailNotificationXSLT>
+		<mail_info>
+			<MailFlag>{{MailFlag}}</MailFlag>
+			<SendArchiveInfo>{{EmailSendArchiveInfo}}</SendArchiveInfo>
+			<MailFormat>{{MailFormat}}</MailFormat>
+			<mail-mime-sender>{{MailSender}}</mail-mime-sender>
+			<mail-mime-recipient>{{MailRecipient}}</mail-mime-recipient>
+			<mail-mime-cc>{{MailCc}}</mail-mime-cc>
+			<mail-mime-subject>{{MailSubject}}</mail-mime-subject>
+		</mail_info>
+		</PROCNAME>

@@ -1,0 +1,46 @@
+<!--*******************************************************************************************************
+Business Object Name        : {{BP_NAME}}
+Business Object Description : {{DESCRIPTION}}
+Business Object Requirements: Modify {{GENERIC_BP}}_Config.xslt to configure Transaction.
+
+History:                    Author           Date          Description 
+Initial Version             {{AUTHOR}}      {{DATE}}      initial version
+
+Copyright 2026 - Southern California Edison
+
+*******************************************************************************************************-->
+
+<process name="{{BP_NAME}}">
+  <sequence name="Main">
+    <operation name="processid">
+      <participant name="BPMetaDataInfoService"/>
+      <output message="BPMetaDataServiceTypeInputMessage">
+        <assign to="." from="*"></assign>
+      </output>
+      <input message="inmsg">
+        <assign to="ProcessID" from="/inmsg/BPDATA/WORKFLOW_ID/text()"></assign>
+      </input>
+    </operation>
+
+    <assign name="Assign" to="ProcessName">{{BP_NAME}}</assign>
+     <assign name="Assign" to="MailName">{{BP_NAME}}</assign>
+    <assign name="Assign" to="SystemName">{{SystemName}}</assign>
+    <operation name="Get Files">
+      <participant name="InlineInvokeBusinessProcessService"/>
+      <output message="InvokeBusinessProcessServiceTypeInputMessage">
+        <assign to="WFD_NAME">{{GENERIC_BP}}</assign>
+        <assign to="." from="*"></assign>
+      </output>
+      <input message="inmsg">
+        <assign to="." from="*"></assign>
+      </input>
+    </operation>
+
+    <onFault>
+      <sequence name="Sequence Start">
+        <spawn name="Spawn" ref="{{ERROR_BP}}"/>
+
+      </sequence>
+    </onFault>
+  </sequence>
+</process>

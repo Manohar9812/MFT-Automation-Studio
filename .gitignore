@@ -1,0 +1,21 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+
+# Logs & temp
+*.log
+_verify.js
+tmp/
+temp/
+
+# Node (only if you add tooling later)
+node_modules/
+npm-debug.log*
+
+# Python (only if you add tooling later)
+__pycache__/
+*.py[cod]
+.venv/
+venv/

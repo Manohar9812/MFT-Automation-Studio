@@ -1,0 +1,9 @@
+<ERRORMAIL name="{{ProcessName}}">
+		<email_info>
+			<mail-format>{{ErrMailFormat}}</mail-format>
+			<mail-mime-sender>{{ErrMailSender}}</mail-mime-sender>
+			<mail-mime-recipient>{{ErrMailRecipient}}</mail-mime-recipient>
+			<mail-mime-cc>{{ErrMailCc}}</mail-mime-cc>
+			<mail-mime-subject>{{ErrMailSubject}}</mail-mime-subject>
+		</email_info>
+</ERRORMAIL>

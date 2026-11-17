@@ -1,0 +1,70 @@
+<process name="{{BP_NAME}}">
+
+<!--*******************************************************************************************************
+Business Object Name        : {{BP_NAME}}
+Business Object Description : {{DESCRIPTION}}
+Business Object Requirements: Modify {{GENERIC_BP}}.xslt to configure Transaction.
+
+History:                    Author           Date          Description 
+Initial Version             {{AUTHOR}}      {{DATE}}      initial version
+
+Copyright 2010 - Southern California Edison
+
+*******************************************************************************************************-->
+<rule name="MailboxExists">
+	<condition>boolean(/ProcessData/List_of_Mailboxes/MailboxPath[text()=/ProcessData/SourceMailbox])</condition>
+</rule>
+  <sequence>
+    <assign to="ProcessName">{{BP_NAME}}</assign>
+{{#DYNAMIC}}	<operation name="Timestamp Utility">
+      <participant name="TimestampUtilService"/>
+      <output message="TimestampUtilServiceTypeInputMessage">
+        <assign to="." from="*"></assign>
+        <assign to="action">format</assign>
+        <assign to="baseTime">now</assign>
+        <assign to="format">{{DATE_FORMAT}}</assign>
+      </output>
+      <input message="inmsg">
+        <assign to="." from="*"></assign>
+      </input>
+    </operation>
+	<assign name="Assign" to="{{DATE_VAR}}" from="/ProcessData/formatedTime/text()"></assign>
+{{/DYNAMIC}}    {{SOURCE_MAILBOX_ASSIGN}}
+
+    <operation name="MailboxListServiceType">
+      <participant name="MailboxList"/>
+		<output message="MailboxListServiceTypeInputMessage">
+			<assign to="." from="*"></assign>
+		</output>
+		<input message="inmsg">
+			<assign to="List_of_Mailboxes" from="*"></assign>
+		</input>
+    </operation>
+
+    <choice name="MailboxExistsCheck">
+		<select>
+			<case ref="MailboxExists" activity="MailboxFound"/>
+		</select>
+		<sequence name="MailboxFound">	
+			<operation name="Get Files">
+			<participant name="InlineInvokeBusinessProcessService"/>
+				<output message="InvokeBusinessProcessServiceTypeInputMessage">
+					<assign to="WFD_NAME">{{GENERIC_BP}}</assign>
+					<assign to="." from="*"></assign>
+				</output>
+				<input message="inmsg">
+					<assign to="." from="*"></assign>
+				</input>
+			</operation>
+		</sequence>
+	</choice>	
+	
+    <onFault>
+      <sequence name="Sequence Start">
+        <assign to="MailName">{{BP_NAME}}</assign>
+        <spawn name="Spawn" ref="{{ERROR_BP}}"/>
+
+      </sequence>
+    </onFault>
+  </sequence>
+</process>

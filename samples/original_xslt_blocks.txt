@@ -1,0 +1,68 @@
+<PROCNAME name="SCE_IB_ML_ENS_ECMWF_1km_From_HPCC_TSYL_To_WDSP_Palantir_00z">     
+			<ProcessName>SCE_IB_ML_ENS_ECMWF_1km_From_HPCC_TSYL_To_WDSP_Palantir_00z</ProcessName>
+			<MailboxPath><xsl:value-of select="concat('/HPCC_Technosylva/sce-inbound/init_',/ProcessData/MyCurrentDayDate,'00z/post/station_ecmwf')"/></MailboxPath>
+			<MessageNamePattern>*.csv</MessageNamePattern>
+			<PGPFlag>No</PGPFlag>
+			<PGPExtn></PGPExtn>
+			<KeyMapName></KeyMapName>
+			<ArchiveFlag>No</ArchiveFlag>
+			<AddArchiveTimestamp>No</AddArchiveTimestamp>
+			<ArchiveFolder></ArchiveFolder>		
+			<ConstantTargetFileName>No</ConstantTargetFileName>
+			<PredefinedTargetFilenameWithExtn></PredefinedTargetFilenameWithExtn>
+			<UnixToWindowsConversion>No</UnixToWindowsConversion>
+			<WindowsToUnixConversion>No</WindowsToUnixConversion>
+			<TargetFileCheck>No</TargetFileCheck>
+			<AddTargetTimestamp>No</AddTargetTimestamp>
+			<TargetTimestampFormat></TargetTimestampFormat>
+			<TimestampSeparator></TimestampSeparator>
+			<FirstTargetFolder>/mft_psc/CSV/ML_ENS_ECMWF/AZX/00z</FirstTargetFolder>
+			<SecondTargetFolder>/mft_psc/Palantir/ML_ENS_ECMWF/AZX/00z</SecondTargetFolder>
+			<ThirdTargetFolder>/mft_hana_st/WEATHER/ADS_ML_ENS_ECMWF/00z</ThirdTargetFolder>		
+			<CLA2_info>
+				<NoofCLACommands>0</NoofCLACommands>
+				<CLACommand></CLACommand>
+			</CLA2_info>
+			<DeleteTriggerFile></DeleteTriggerFile>
+			<TriggerFileName></TriggerFileName>
+			<TriggerBPAtEndInParent>No</TriggerBPAtEndInParent>
+			<ParentTriggerBPName></ParentTriggerBPName>
+			<TriggerBPAtEndInChild>No</TriggerBPAtEndInChild>
+			<ChildTriggerBPName></ChildTriggerBPName>
+			<SendSuccessEmail>No</SendSuccessEmail>
+			<MailName>SCE_IB_ML_ENS_ECMWF_1km_From_HPCC_TSYL_To_WDSP_Palantir_00z</MailName>
+	</PROCNAME>
+
+<PROCNAME name="SCE_IB_ML_ENS_ECMWF_1km_From_HPCC_TSYL_To_WDSP_Palantir_12z">     
+			<ProcessName>SCE_IB_ML_ENS_ECMWF_1km_From_HPCC_TSYL_To_WDSP_Palantir_12z</ProcessName>
+			<MailboxPath><xsl:value-of select="concat('/HPCC_Technosylva/sce-inbound/init_',/ProcessData/MyCurrentDayDate,'12z/post/station_ecmwf')"/></MailboxPath>
+			<MessageNamePattern>*.csv</MessageNamePattern>
+			<FirstTargetFolder>/mft_psc/CSV/ML_ENS_ECMWF/AZX/12z</FirstTargetFolder>
+			<SecondTargetFolder>/mft_psc/Palantir/ML_ENS_ECMWF/AZX/12z</SecondTargetFolder>
+			<ThirdTargetFolder>/mft_hana_st/WEATHER/ADS_ML_ENS_ECMWF/12z</ThirdTargetFolder>		
+			<MailName>SCE_IB_ML_ENS_ECMWF_1km_From_HPCC_TSYL_To_WDSP_Palantir_12z</MailName>
+	</PROCNAME>
+
+<PROCNAME name="SCE_IB_ML_ENS_ECMWF_GFS_1km_From_HPCC_TSYL_To_WDSP_Palantir_00z">     
+			<ProcessName>SCE_IB_ML_ENS_ECMWF_GFS_1km_From_HPCC_TSYL_To_WDSP_Palantir_00z</ProcessName>
+			<MailboxPath><xsl:value-of select="concat('/HPCC_Technosylva/sce-inbound/init_',/ProcessData/MyCurrentDayDate,'00z/post/station_ecmwf_gfs')"/></MailboxPath>
+			<MessageNamePattern>*.csv</MessageNamePattern>
+			<FirstTargetFolder>/mft_psc/CSV/ML_ENS_ECMWF_GFS/AZX/00z</FirstTargetFolder>
+			<MailName>SCE_IB_ML_ENS_ECMWF_GFS_1km_From_HPCC_TSYL_To_WDSP_Palantir_00z</MailName>
+	</PROCNAME>
+
+<PROCNAME name="SCE_IB_ML_ENS_ECMWF_GFS_1km_From_HPCC_TSYL_To_WDSP_Palantir_12z">     
+			<ProcessName>SCE_IB_ML_ENS_ECMWF_GFS_1km_From_HPCC_TSYL_To_WDSP_Palantir_12z</ProcessName>
+			<MailboxPath><xsl:value-of select="concat('/HPCC_Technosylva/sce-inbound/init_',/ProcessData/MyCurrentDayDate,'12z/post/station_ecmwf_gfs')"/></MailboxPath>
+			<MessageNamePattern>*.csv</MessageNamePattern>
+			<FirstTargetFolder>/mft_psc/CSV/ML_ENS_ECMWF_GFS/AZX/12z</FirstTargetFolder>
+			<MailName>SCE_IB_ML_ENS_ECMWF_GFS_1km_From_HPCC_TSYL_To_WDSP_Palantir_12z</MailName>
+	</PROCNAME>
+
+<PROCNAME name="SCE_IB_ML_ENS_GFS_1km_From_HPCC_TSYL_To_WDSP_Palantir_00z">     
+			<ProcessName>SCE_IB_ML_ENS_GFS_1km_From_HPCC_TSYL_To_WDSP_Palantir_00z</ProcessName>
+			<MailboxPath><xsl:value-of select="concat('/HPCC_Technosylva/sce-inbound/init_',/ProcessData/MyCurrentDayDate,'00z/post/station_gfs')"/></MailboxPath>
+			<MessageNamePattern>*.csv</MessageNamePattern>
+			<FirstTargetFolder>/mft_psc/CSV/ML_ENS_GFS/AZX/00z</FirstTargetFolder>
+			<MailName>SCE_IB_ML_ENS_GFS_1km_From_HPCC_TSYL_To_WDSP_Palantir_00z</MailName>
+	</PROCNAME>
