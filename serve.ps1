@@ -2,13 +2,14 @@
     MFT Automation Studio - local launcher
     Right-click > Run with PowerShell, or run:  .\serve.ps1
     Starts the AI backend (http://127.0.0.1:8100) and the static web app
-    (http://localhost:8080), then opens the app.
+    (http://localhost:8080) from the frontend/ folder, then opens the app.
 #>
 param([int]$Port = 8080, [int]$ApiPort = 8100)
 
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $here
 
+$frontend = Join-Path $here "frontend"
 $url = "http://localhost:$Port/index.html"
 
 # ---- Start the AI backend if its venv exists -------------------------------
@@ -28,6 +29,9 @@ else {
 
 $url = "http://localhost:$Port/index.html"
 Write-Host "Serving MFT Automation Studio at $url" -ForegroundColor Yellow
+
+# Serve the static site from the frontend/ folder.
+Set-Location $frontend
 
 # Prefer Python; fall back to Node's http-server.
 $python = Get-Command python -ErrorAction SilentlyContinue

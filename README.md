@@ -36,15 +36,17 @@ Because the app loads JavaScript files with `<script src>`, it should be served 
 ### Option 1 – Python (built-in)
 
 ```powershell
-# from inside this folder
+# from inside the frontend folder
+cd frontend
 python -m http.server 8080
 ```
 Then open <http://localhost:8080/index.html>.
 
-### Option 2 – Node (http-server)
+### Option 2 – One-click launcher (backend + frontend)
 
 ```powershell
-npx http-server -p 8080
+# from the repo root — starts the AI backend and serves the frontend
+.\serve.ps1
 ```
 
 ### Option 3 – VS Code
@@ -85,33 +87,35 @@ All 62 checks should report **PASS**.
 
 ```
 .
-├── index.html              # App shell (login + sidebar layout)
-├── css/
-│   └── app.css             # SCE white / yellow / black theme
-├── js/
-│   ├── templates.js        # Built-in templates + config maps (window.__BUILTIN__)
-│   ├── edi-envelopes.js    # EDI trading-partner envelope parser/generator
-│   ├── golden.js           # Fixed reference state for the self-test
-│   ├── app.js              # Application logic (wizard, engine, auth, views)
-│   └── ai.js               # AI Assistant chat UI (talks to the backend)
-├── backend/                # FastAPI + LangGraph/LangChain AI service
-│   ├── app.py              # REST API (/api/chat, /api/agent, /api/extract …)
-│   ├── agent.py            # LangGraph agents + Azure OpenAI (LangChain)
-│   ├── catalog.py/.json    # Approved-interface catalog + retrieval
-│   ├── knowledge.py        # Grounding facts for the assistant
-│   ├── config.py           # Loads secrets from backend/.env (git-ignored)
-│   └── requirements.txt    # Python dependencies
-├── assets/
-│   └── sce-logo.svg        # SCE sunburst logo
-├── templates/              # Reference artefacts, grouped by type
-│   ├── edi/                # EDI interfaces (810_OB, 814_IB, …, 867)
-│   │   └── <interface>/    # Envelopes.xml + route rules + XSLT config blocks
-│   └── generic/            # Generic transfers (MB_MB, FS_FS, SFTP_TO_FS, …)
-└── samples/                # Sample input/output artefacts
+├── serve.ps1               # Local launcher (starts backend + serves frontend/)
+├── README.md  LICENSE  .gitignore
+├── frontend/               # Static web app (no build step)
+│   ├── index.html          # App shell (login + sidebar layout)
+│   ├── css/app.css         # SCE white / yellow / black theme
+│   ├── js/
+│   │   ├── templates.js     # Built-in templates + config maps (window.__BUILTIN__)
+│   │   ├── edi-envelopes.js # EDI trading-partner envelope parser/generator
+│   │   ├── golden.js        # Fixed reference state for the self-test
+│   │   ├── app.js           # Application logic (wizard, engine, auth, views)
+│   │   └── ai.js            # AI Assistant chat UI (talks to the backend)
+│   ├── assets/sce-logo.svg
+│   ├── templates/           # Reference artefacts, grouped by type
+│   │   ├── edi/             # EDI interfaces (810_OB, 814_IB, …, 867)
+│   │   │   └── <interface>/ # Envelopes.xml + route rules + XSLT config blocks
+│   │   └── generic/         # Generic transfers (MB_MB, FS_FS, SFTP_TO_FS, …)
+│   └── samples/             # Sample input/output artefacts
+└── backend/                # FastAPI + LangGraph/LangChain AI service
+    ├── app.py              # REST API (/api/chat, /api/agent, /api/extract …)
+    ├── agent.py            # LangGraph agents + Azure OpenAI (LangChain)
+    ├── catalog.py/.json    # Approved-interface catalog + retrieval
+    ├── knowledge.py        # Grounding facts for the assistant
+    ├── config.py           # Loads secrets from backend/.env (git-ignored)
+    ├── .env.example        # Template — copy to backend/.env and fill in secrets
+    └── requirements.txt    # Python dependencies
 ```
 
 Each EDI interface folder uses a consistent **`Envelopes.xml`** for the trading-partner
-ISA/GS/ST segments, which the app fetches at runtime (see the `MAP` in `js/edi-envelopes.js`).
+ISA/GS/ST segments, which the app fetches at runtime (see the `MAP` in `frontend/js/edi-envelopes.js`).
 
 ---
 
