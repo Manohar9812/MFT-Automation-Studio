@@ -12,14 +12,19 @@ Built by the Integration Services team at **Southern California Edison (SCE)**.
 
 ## ✨ Features
 
-- **Guided wizard** – pick an interface (Mailbox→FS, SFTP→FS, etc.) and fill a short form.
+- **Guided wizard** – pick an interface (Mailbox→FS, SFTP→FS, EDI 810/814/…​, etc.) and fill a short form.
+- **AI Assistant** – a LangGraph/LangChain copilot (Azure OpenAI) that recommends the right
+  approved template and collects every field section-by-section, including EDI envelopes.
+- **EDI trading-partner envelopes** – ISA/GS/ST segments are read from each interface's
+  `Envelopes.xml`, made editable (name, sender/receiver IDs, control numbers, parms), and
+  regenerated as importable XML.
 - **Multiple XSLT blocks per interface** – e.g. SFTP Get config, Error e-mail, Success e-mail.
 - **SFTP config page** renders fields in exact XSLT order with simple Yes/No toggles.
 - **Import existing artefacts** and analyse them back into the form (round-trip).
 - **Download** individual files, copy to clipboard, or export a `.zip` package (via JSZip).
 - **Access accounts** – admin-managed sign-in accounts (add / disable / reset / delete users).
-- **Built-in self-test** – 62 automated checks validating generated output.
-- **Zero build step** – plain HTML/CSS/vanilla JS. No npm, no bundler.
+- **Built-in self-test** – automated checks validating generated output.
+- **Zero build step** for the frontend – plain HTML/CSS/vanilla JS. No npm, no bundler.
 
 ---
 
@@ -80,20 +85,33 @@ All 62 checks should report **PASS**.
 
 ```
 .
-├── index.html            # App shell (login + sidebar layout)
+├── index.html              # App shell (login + sidebar layout)
 ├── css/
-│   └── app.css           # SCE white / yellow / black theme
+│   └── app.css             # SCE white / yellow / black theme
 ├── js/
-│   ├── templates.js      # Built-in templates + config maps (window.__BUILTIN__)
-│   ├── golden.js         # Fixed reference state for the self-test
-│   └── app.js            # All application logic (wizard, engine, auth, views)
+│   ├── templates.js        # Built-in templates + config maps (window.__BUILTIN__)
+│   ├── edi-envelopes.js    # EDI trading-partner envelope parser/generator
+│   ├── golden.js           # Fixed reference state for the self-test
+│   ├── app.js              # Application logic (wizard, engine, auth, views)
+│   └── ai.js               # AI Assistant chat UI (talks to the backend)
+├── backend/                # FastAPI + LangGraph/LangChain AI service
+│   ├── app.py              # REST API (/api/chat, /api/agent, /api/extract …)
+│   ├── agent.py            # LangGraph agents + Azure OpenAI (LangChain)
+│   ├── catalog.py/.json    # Approved-interface catalog + retrieval
+│   ├── knowledge.py        # Grounding facts for the assistant
+│   ├── config.py           # Loads secrets from backend/.env (git-ignored)
+│   └── requirements.txt    # Python dependencies
 ├── assets/
-│   └── sce-logo.svg      # SCE sunburst logo
-├── templates/            # Plain-text copies of the templates (reference)
-│   ├── mb-fs/
-│   └── sftp-fs/
-└── samples/              # Sample input/output artefacts
+│   └── sce-logo.svg        # SCE sunburst logo
+├── templates/              # Reference artefacts, grouped by type
+│   ├── edi/                # EDI interfaces (810_OB, 814_IB, …, 867)
+│   │   └── <interface>/    # Envelopes.xml + route rules + XSLT config blocks
+│   └── generic/            # Generic transfers (MB_MB, FS_FS, SFTP_TO_FS, …)
+└── samples/                # Sample input/output artefacts
 ```
+
+Each EDI interface folder uses a consistent **`Envelopes.xml`** for the trading-partner
+ISA/GS/ST segments, which the app fetches at runtime (see the `MAP` in `js/edi-envelopes.js`).
 
 ---
 

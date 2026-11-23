@@ -14,15 +14,15 @@
 
   // ---- interface -> envelope export XML (served from the workspace root) ----
   var MAP = {
-    EDI810OB: 'templates/810_OB/Envelopes.xml',
-    EDI814IB: 'templates/814_IB/Envelopes.xml',
-    EDI814OB: 'templates/814_OB/Envelopes.xml',
-    EDI820IB: 'templates/820_IB/Envelopes.xml',
-    EDI824IB: 'templates/824_IB/Envelopes.xml',
-    EDI824OB: 'templates/824_OB/Envelopes.xml',
-    EDI850OB: 'templates/850_OB/Envelopes.xml',
-    EDI852OB: 'templates/852_OB/Envelopes.xml',
-    EDI867:   'templates/867/Envelopes.xml'
+    EDI810OB: 'templates/edi/810_OB/Envelopes.xml',
+    EDI814IB: 'templates/edi/814_IB/Envelopes.xml',
+    EDI814OB: 'templates/edi/814_OB/Envelopes.xml',
+    EDI820IB: 'templates/edi/820_IB/Envelopes.xml',
+    EDI824IB: 'templates/edi/824_IB/Envelopes.xml',
+    EDI824OB: 'templates/edi/824_OB/Envelopes.xml',
+    EDI850OB: 'templates/edi/850_OB/Envelopes.xml',
+    EDI852OB: 'templates/edi/852_OB/Envelopes.xml',
+    EDI867:   'templates/edi/867/Envelopes.xml'
   };
 
   // Developer-fillable ENVELOPE_PARM names, grouped by the leading segment of
