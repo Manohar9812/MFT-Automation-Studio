@@ -1,0 +1,17 @@
+<PROC_NAME name="SCE_OB_852_SUPL_PA">
+		<file_info>
+			<CollectionFolder>/FTI/GENTRAN/PickUp</CollectionFolder>
+			<FileName>ProductActivity*.txt</FileName>
+			<TargetMB>/DocumentOutbound/EDI</TargetMB>
+			<TargetMessageName>APPL_OB_852_SUPL_PA.txt</TargetMessageName>
+		</file_info>
+		<mail_info>
+			<SendSuccessMail>Yes</SendSuccessMail>
+			<SendArchiveInfo>Yes</SendArchiveInfo>
+			<MailFormat>TEXT</MailFormat>
+			<mail-mime-sender>scemftprod@sce.com</mail-mime-sender>
+			<mail-mime-recipient>pisupport@sce.com</mail-mime-recipient>
+			<mail-mime-cc>scemftprod@sce.com</mail-mime-cc>
+			<mail-mime-subject>SCE_ERP_OB_852_PA_SUPPLIERS_MFT Successful</mail-mime-subject>
+		</mail_info>
+	</PROC_NAME>

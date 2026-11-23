@@ -19,3 +19,7 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+
+# Secrets — never commit real keys
+backend/.env
+.env

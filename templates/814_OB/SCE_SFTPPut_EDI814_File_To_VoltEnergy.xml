@@ -1,0 +1,207 @@
+
+<!--*********************************************************************************************************************
+Business Object Name        : SCE_SFTPPut_EDI814_File_To_Constellation
+Business Object Description : This process invoke SCE_SFTPPut to transfer EDI files
+
+History:                    Author         Date        Description 
+Initial Version             Daniel    09/09/2025    Initial version
+
+Copyright 2013 - Southern California Edison
+************************************************************************************************************************-->
+<process name="SCE_SFTPPut_EDI814_File_To_VoltEnergy">
+	<rule name="AnotherMessageId">
+		<condition>number(counters/positionCurrent) &lt; number(counters/positionMax)</condition>
+	</rule>
+	<sequence name="Main">
+		<operation name="processid">
+			<participant name="BPMetaDataInfoService"/>
+			<output message="BPMetaDataServiceTypeInputMessage">
+				<assign to="." from="*"/>
+			</output>
+			<input message="inmsg">
+				<assign to="ProcessID" from="/inmsg/BPDATA/WORKFLOW_ID/text()"/>
+			</input>
+		</operation>
+		<assign name="Assign" to="ProcessName">SCE_SFTPPut_EDI814_File_To_VoltEnergy</assign>
+		<assign name="Assign" to="MailName">SCE_SFTPPut_EDI814_File_To_VoltEnergy</assign>
+		<assign name="Assign" to="ConfigName">SCE_SFTPPut</assign>
+		<assign name="Assign" to="SystemName">VoltEnergy_814</assign>
+		<assign name="Assign" to="counters/positionCurrent">0</assign>
+		<assign name="Assign" to="counters/positionMax" from="count(/ProcessData/RoutingRequest/RoutingRequest/MessageId)"/>
+		<choice name="AnotherMessage">
+			<select>
+				<case ref="AnotherMessageId" activity="processMessage"/>
+			</select>
+			<sequence name="processMessage">
+				<assign name="Assign" to="counters/positionCurrent" from="number(counters/positionCurrent) + 1"/>
+				<sequence name="BeginMsgExtract">
+					<operation name="QueryFile">
+						<participant name="MailboxQuery"/>
+						<output message="QueryRequest">
+							<assign to="." from="*"/>
+							<assign to="MessageId" from="string(RoutingRequest/RoutingRequest/MessageId[number(/ProcessData/counters/positionCurrent)])"/>
+							<assign to="MailboxPath">/Voltenergy/Outbound</assign>
+						</output>
+						<input message="inmsg">
+							<assign to="Variables" from="*"/>
+						</input>
+					</operation>
+					<operation name="ExtractFile">
+						<participant name="MailboxExtractBegin"/>
+						<output message="MailboxExtractBeginServiceTypeInputMessage">
+							<assign to="MessageId" from="string(RoutingRequest/RoutingRequest/MessageId[number(/ProcessData/counters/positionCurrent)])"/>
+							<assign to="CommitNow">YES</assign>
+						</output>
+						<input message="inmsg">
+							<assign to="Variables/Message/MessageName" from="string(MessageName)" append="true"/>
+							<assign to="Variables/Message/MessagePath" from="string(MailboxPath)" append="true"/>
+							<assign to="PrimaryDocument" from="PrimaryDocument/@SCIObjectID"/>
+							<assign to="Variables/Message/MessageSize" from="string(MessageSize)" append="true"/>
+						</input>
+					</operation>
+					<operation name="PGP">
+						<participant name="PGPPackageService"/>
+						<output message="PGPPackageServiceTypeInputMessage">
+							<assign to="setSoTimeout">600000</assign>
+							<assign to="ascii_armor">on</assign>
+							<assign to="public_user">0x1C5A462F</assign>
+							<assign to="compress">off</assign>
+							<assign to="profile_name">SCE_PGP</assign>
+							<assign to="cmdline2svcname">SCE_PGPCmdlineService</assign>
+							<assign to="." from="*"/>
+						</output>
+						<input message="inmsg">
+							<assign to="." from="*"/>
+							<assign to="PGPResults" from="*"/>
+						</input>
+					</operation>
+					<operation name="ReleasePD">
+						<participant name="ReleaseService"/>
+						<output message="ReleaseServiceTypeInputMessage">
+							<assign to="." from="*"/>
+							<assign to="TARGET">PrimaryDocument</assign>
+						</output>
+						<input message="inmsg">
+							<assign to="." from="*"/>
+						</input>
+					</operation>
+					<assign name="Assign" to="PrimaryDocument" from="/ProcessData/PGP/Document/@SCIObjectID"/>
+					<operation name="Get Document Information Service">
+						<participant name="GetDocumentInfoService"/>
+						<output message="GetDocumentInfoServiceTypeInputMessage">
+							<assign to="DocumentName" from="concat(/ProcessData/Variables/Message/MessageName/text(), &apos;.pgp&apos;)"/>
+							<assign to="updateMetaDataOnly">true</assign>
+							<assign to="." from="*"/>
+						</output>
+						<input message="inmsg">
+						</input>
+					</operation>
+					<operation name="Put File">
+						<participant name="InlineInvokeBusinessProcessService"/>
+						<output message="InvokeBusinessProcessServiceTypeInputMessage">
+							<assign to="WFD_NAME">SCE_SFTPPut</assign>
+							<assign to="." from="*"/>
+						</output>
+						<input message="inmsg">
+							<assign to="." from="*"/>
+						</input>
+					</operation>
+					<operation name="DeleteFile">
+						<participant name="MailboxDelete"/>
+						<output message="DeleteRequest">
+							<assign to="MessageId" from="string(RoutingRequest/RoutingRequest/MessageId[number(/ProcessData/counters/positionCurrent)])"/>
+							<assign to="DaysOld">0</assign>
+							<assign to="MessageExtractable">All</assign>
+							<assign to="MailboxPath">/Voltenergy/Outbound</assign>
+						</output>
+						<input message="inmsg">
+							<assign to="DeleteResults" from="*"/>
+						</input>
+					</operation>
+					<operation name="readEmailBodyxsltdoc">
+						<participant name="XSLTService"/>
+						<output message="XSLTServiceTypeInputMessage">
+							<assign to="xslt_name">SCE_SFTP_Put_Multiple_Success_MailBody</assign>
+							<assign to="xml_input_from">ProcData</assign>
+							<assign to="input_pd_xpath">/ProcessData</assign>
+							<assign to="xml_input_validation">NO</assign>
+							<assign to="." from="*"/>
+						</output>
+						<input message="inmsg">
+							<assign to="ReadXSLTResults" from="*"/>
+						</input>
+					</operation>
+					<assign name="Assign" to="PrimaryDocument" from="/ProcessData/ReadXSLTResults/PrimaryDocument/@SCIObjectID"/>
+					<assign name="Assign" to="mailhost">smtp.sce.com</assign>
+					<operation name="Mail Mime Service">
+						<participant name="MailMimeService"/>
+						<output message="MailMimeServiceInputMessage">
+							<assign to="mail-mime-subject" from="concat(//MessageName/text(), &apos; - File Sent to SFTP Successfully&apos;)"/>
+							<assign to="mail-mime-sender">scemftprod@sce.com</assign>
+							<assign to="mail-mime-operation">build</assign>
+							<assign to="mail-mime-use-doc-area">false</assign>
+							<assign to="mail-mime-subject-encoding">UTF-8</assign>
+							<assign to="mail-mime-recipient">scemftprod@sce.com</assign>
+							<assign to="mail-mime-body">true</assign>
+							<assign to="." from="*"/>
+						</output>
+						<input message="inmsg">
+							<assign to="." from="*"/>
+						</input>
+					</operation>
+					<operation name="SMTP Send Email">
+						<participant name="SMTP_SEND_ADAPTER"/>
+						<output message="Xout">
+							<assign to="." from="*"/>
+							<assign to="xport-smtp-mailfrom">scemftprod@sce.com</assign>
+							<assign to="xport-smtp-mailhost" from="//mailhost/text()"/>
+							<assign to="b2b-raw-message">true</assign>
+							<assign to="xport-smtp-mailport">25</assign>
+							<assign to="xport-b2b-mode">off</assign>
+						</output>
+						<input message="Xin">
+							<assign to="." from="*"/>
+						</input>
+					</operation>
+					<operation name="ReleaseEMailBody">
+						<participant name="ReleaseService"/>
+						<output message="ReleaseServiceTypeInputMessage">
+							<assign to="TARGET">ReadXSLTResults</assign>
+							<assign to="." from="*"/>
+						</output>
+						<input message="inmsg">
+							<assign to="." from="*"/>
+						</input>
+					</operation>
+					<operation name="ReleasePD">
+						<participant name="ReleaseService"/>
+						<output message="ReleaseServiceTypeInputMessage">
+							<assign to="TARGET">PrimaryDocument | DocumentName | DocumentId | MessageName | ArchiveInfo | message_to_child | TargetFileName | MessageSize | Variables</assign>
+							<assign to="." from="*"/>
+						</output>
+						<input message="inmsg">
+							<assign to="." from="*"/>
+						</input>
+					</operation>
+				</sequence>
+				<repeat name="NextMessage" ref="AnotherMessage"/>
+			</sequence>
+		</choice>
+		<onFault>
+			<sequence name="Sequence Start">
+				<spawn name="Spawn" ref="SCE_Generic_EMailOnError"/>
+				<operation name="BPException">
+					<participant name="BPExceptionService"/>
+					<output message="BPExceptionServiceTypeInputMessage">
+						<assign to="exceptionCode">ERROR</assign>
+						<assign to="." from="*"/>
+					</output>
+					<input message="inmsg">
+						<assign to="." from="*"/>
+					</input>
+				</operation>
+			</sequence>
+		</onFault>
+	</sequence>
+</process>
+  

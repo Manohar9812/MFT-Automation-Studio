@@ -1,0 +1,81 @@
+<!--************************************************************************************************************
+Business Object Name        : SCE_OB_EDI867_From_ODS_LP
+Business Object Description : This process check whether the previous process is in Active and lock state if not it 
+							   locks and invokes the Inline process "SCE_OB_EDI867_From_ODS_LP"
+							   
+History:                    Author           Date            Description 
+Initial Version             Krishna          04/10/2021      initial version
+
+Copyright 2010 - Southern California Edison
+
+**************************************************************************************************************-->
+  <rule name="LOCK_EXIST">
+    <condition>LOCK_EXIST=&apos;false&apos;</condition>
+  </rule>
+
+  <sequence name="main">
+    <operation name="CheckLock">
+      <participant name="LockService"/>
+      <output message="LockServiceTypeInputMessage">
+        <assign to="ACTION">CHECK</assign>
+        <assign to="LOCK_KEY">SCE_OB_EDI867_From_ODS</assign>
+        <assign to="." from="*"></assign>
+      </output>
+      <input message="inmsg">
+        <assign to="." from="*"></assign>
+      </input>
+    </operation>
+
+    <choice>
+      <select>
+        <case ref="LOCK_EXIST" activity="sub"/>
+      </select>
+	  
+      <sequence name="sub">
+        <operation name="Lock">
+          <participant name="LockService"/>
+          <output message="LockServiceTypeInputMessage">
+            <assign to="ACTION">LOCK</assign>
+            <assign to="CLEAR_ON_START_UP">TRUE</assign>
+            <assign to="DURATION">86400000</assign>
+            <assign to="LOCK_KEY">SCE_OB_EDI867_From_ODS</assign>
+            <assign to="." from="*"></assign>
+          </output>
+          <input message="inmsg">
+            <assign to="." from="*"></assign>
+          </input>
+        </operation>
+        <operation name="Invoke Business Process Service">
+          <participant name="InlineInvokeBusinessProcessService"/>
+          <output message="InvokeBusinessProcessServiceTypeInputMessage">
+            <assign to="." from="*"></assign>
+            <assign to="WFD_NAME">SCE_OB_EDI867_From_ODS</assign>
+          </output>
+          <input message="inmsg">
+            <assign to="." from="*"></assign>
+          </input>
+        </operation>
+        <operation name="UnLock">
+          <participant name="LockService"/>
+          <output message="LockServiceTypeInputMessage">
+            <assign to="ACTION">UNLOCK</assign>
+            <assign to="LOCK_KEY">SCE_OB_EDI867_From_ODS</assign>
+            <assign to="." from="*"></assign>
+          </output>
+          <input message="inmsg">
+            <assign to="." from="*"></assign>
+          </input>
+        </operation>
+
+	<onFault>
+      <sequence name="Sequence Start">
+        <assign name="Assign" to="MailName" from="//MailName/text()"></assign>
+        <spawn name="Spawn" ref="SCE_Generic_EMailOnError"/>
+      </sequence>
+    </onFault>
+
+      </sequence>
+    </choice>
+  </sequence>
+</process>
+  

@@ -1,0 +1,15 @@
+<EDIPROCESS name="APPL_OB_852_SUPL_PA">
+		<ob_info>
+			<app-archive-name><xsl:value-of select="concat('APPL_OB_852_4010_SUPL_PA.',$DateTime,'.txt')"/></app-archive-name>
+			<app-archive-path>/mft_EDI_Archive/APPL/OB_852_4010_SUPL_PA</app-archive-path>
+			<edi-archive-name><xsl:value-of select="concat('EDI_OB_852_4010_SUPL_PA.',$DateTime,'.txt')"/></edi-archive-name>
+			<edi-archive-path>/mft_EDI_Archive/EDI/OB_852_4010_SUPL_PA</edi-archive-path>
+			<temp-file-name>EDI_OB_852_4010_SUPL_PA.txt</temp-file-name>
+			<temp-file-path>/mft/tempedi/OB/852</temp-file-path>
+			<mb-staging-name><xsl:value-of select="concat('EDI_OB_852_4010_SUPL_PA.',$DateTime,'.txt')"/></mb-staging-name>
+			<mb-staging-dir>/EDIStagingOutbound/OB_852_4010_SUPL_PA</mb-staging-dir>
+			<mb-retransmit-name><xsl:value-of select="concat('EDI_OB_852_4010_SUPL_PA.',$DateTime,'.txt')"/></mb-retransmit-name>
+			<mb-retransmit-dir>/EDIRetransmit/OB_852_4010_SUPL_PA</mb-retransmit-dir>
+			<map_name>SCE_OB_852_4010_GENERIC</map_name>
+		</ob_info>
+	</EDIPROCESS>

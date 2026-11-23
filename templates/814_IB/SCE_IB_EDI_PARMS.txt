@@ -1,0 +1,17 @@
+	
+	<EDIPROCESS name="VoltEnergy-SFTP-Inbound_814_004010">
+		<ib_info>
+		  <edi-staging-dir>/DocumentInbound/EDI</edi-staging-dir>
+			<temp-archive-path>/mft_EDI_Archive/EDI/VoltEnergy</temp-archive-path>
+			<edi-archive-name><xsl:value-of select="concat('EDI_IB_814_From_VoltEnergy.',$DateTime,'.txt')"/></edi-archive-name>
+			<edi-archive-path>/mft_EDI_Archive/EDI/IB_814_4010_ESP_DASR</edi-archive-path>
+			<nia-archive-flag>Yes</nia-archive-flag>
+		    <nia-archive-name><xsl:value-of select="concat('EDI_IB_814_From_VoltEnergy.',$DateTime,'.txt')"/></nia-archive-name>
+		    <nia-archive-path>/mft_NIA_Reporting/IB_814</nia-archive-path>				
+			<app-archive-name><xsl:value-of select="concat('APPL_IB_814_From_VoltEnergy.',$DateTime,'.txt')"/></app-archive-name>
+			<app-archive-path>/mft_EDI_Archive/APPL/IB_814_4010_ESP_DASR</app-archive-path>
+			<destination-staging-dir>/EDIStagingInbound/IB_814_4010_ESP_DASR</destination-staging-dir>
+			<destination-retransmit-dir>/EDIRetransmit/IB_814_4010_ESP_DASR</destination-retransmit-dir>
+			<emailXSLT>SCE_GENERIC_IB_EDI_EMAIL</emailXSLT>
+		</ib_info>
+	</EDIPROCESS>

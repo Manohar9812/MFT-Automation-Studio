@@ -1,0 +1,53 @@
+Description: Bottom Note changed
+XSL Style Sheet:
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html"/>
+<xsl:template match="/">
+<html>
+<body>
+<br></br>
+<br></br>
+<table border="1" bgcolor="#ECF8E0" bordercolor="#610B0B">
+<tr><th colspan="2" align="center" height="50px" bgcolor="#0B615E"><Font size="5" color="#FFFF00"><i>File Transfer Information</i></Font></th></tr>
+<tr><th colspan="2" align="center" height="20px" bgcolor="#CEF6CE"></th></tr>
+<tr>
+<td><Font size="4" color="#B40404"><b>GIS Workflow ID</b></Font></td>
+<td><Font size="4" color="#0B0B61"><b><xsl:value-of select="/ProcessData/ProcessID"/></b></Font></td>
+</tr>
+<tr><th colspan="2" align="center" height="20px" bgcolor="#CEF6CE"></th></tr>
+<tr>
+<td><Font size="4" color="#B40404"><b>GIS BP Name</b></Font></td>
+<td><Font size="4" color="#0B0B61"><b><xsl:value-of select="/ProcessData/ProcessName"/></b></Font></td>
+</tr>
+<tr><th colspan="2" align="center" height="30px" bgcolor="#CEF6CE"></th></tr>
+<tr>
+<td width="160" ><Font size="4" color="#B40404"><b>Source File Name</b></Font></td>
+<td width="600"><Font size="4" color="#0B0B61"><b><xsl:value-of select="/ProcessData/DocumentName"/></b></Font></td>
+</tr>
+<tr><th colspan="2" align="center" height="20px" bgcolor="#CEF6CE"></th></tr>
+<tr>
+<td><Font size="4" color="#B40404"><b>Source Folder Name</b></Font></td>
+<td><Font size="4" color="#0B0B61"><b><xsl:value-of select="/ProcessData/SCEMFTOB/PROCNAME/process_info/CollectionFolder"/></b></Font></td>
+</tr>
+<tr><th colspan="2" align="center" height="30px" bgcolor="#CEF6CE"></th></tr>
+<tr>
+<td><Font size="4" color="#B40404"><b>MailBox File Name</b></Font></td>
+<td><Font size="4" color="#0B0B61"><b><xsl:value-of select="/ProcessData/MailBoxFile"/></b></Font></td>
+</tr>
+<tr><th colspan="2" align="center" height="20px" bgcolor="#CEF6CE"></th></tr>
+<tr>
+<td><Font size="4" color="#B40404"><b>MailBox Name</b></Font></td>
+<td><Font size="4" color="#0B0B61"><b><xsl:value-of select="/ProcessData/SCEMFTOB/PROCNAME/process_info/MailboxPath"/></b></Font></td>
+</tr>
+<tr><th colspan="2" align="center" height="20px" bgcolor="#CEF6CE"></th></tr>
+</table>
+<br></br>
+<br></br>
+<p style="color:#A0522D;font-size:20px;">
+<i>This is a system generated message. If you have any questions, Please send us a reply.</i>
+</p>
+</body>
+</html>
+</xsl:template>
+</xsl:stylesheet>

@@ -1,0 +1,31 @@
+
+	<RULEID name="444cb979:165db8bd7ad:-590f">
+		<process_info>
+			<ProcessName>SCE_IB_EDI814_To_ISU</ProcessName>
+			<MailboxPath>/EDIStagingInbound/IB_814_4010_DASR</MailboxPath>
+			<MessageNamePattern>APPL_IB_814*</MessageNamePattern>
+            <InboundFileExtn>.txt</InboundFileExtn>
+			<DeleteMail>Yes</DeleteMail>
+			<PGPUnPackFlag>No</PGPUnPackFlag>
+			<KeyMapName></KeyMapName>
+			<TimeStampFlag>Yes</TimeStampFlag>
+			<PGPPackFlag>Yes</PGPPackFlag>
+			<public_user>0x02ECCE6B</public_user>
+			<ArchiveFlag>No</ArchiveFlag>
+			<ArchiveFolder></ArchiveFolder>
+			<TargetFolder>/ISUTechData/IDEX/EDI/814/in</TargetFolder>
+			<TargetFileName>APPL_IB_814_4010_ESP_DASR.txt</TargetFileName>
+			<TargetFileExtn>.txt.pgp</TargetFileExtn>
+			<TargetFileCheck>No</TargetFileCheck>
+		</process_info>
+		<mail_info>
+			<MailFlag>Yes</MailFlag>
+			<SendArchiveInfo>No</SendArchiveInfo>
+			<MailFormat>TEXT</MailFormat>
+			<mail-mime-sender>scemftsys@sce.com</mail-mime-sender>
+			<mail-mime-recipient>scemftsys@sce.com</mail-mime-recipient>
+			<mail-mime-cc></mail-mime-cc>
+			<mail-mime-subject>EDI814 posted to ISU successfully</mail-mime-subject>
+			<MailName>SCE_IB_EDI814_To_ISU</MailName>
+		</mail_info>
+	</RULEID>

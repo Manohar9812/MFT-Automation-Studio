@@ -1,0 +1,50 @@
+	
+Description: This Process calls SCE_Generic_SFTPGet BP to Pickup 997 files from VoltEnergy
+Business Process Definition:
+<!--*******************************************************************************************************
+Business Object Name        : SCE_SFTPGet_EDI997_From_VoltEnergy
+Business Object Description : This Process calls SCE_Generic_SFTPGet BP to Pickup 997 files from VoltEnergy.
+Business Object Requirements: Modify SCE_Generic_SFTPGet_Config.xslt to configure Transaction.
+
+History:                    Author           Date          Description 
+Initial Version             Ramya         11/02/2026      initial version
+
+Copyright 2010 - Southern California Edison
+
+*******************************************************************************************************-->
+
+<process name="SCE_SFTPGet_EDI997_From_Riverside">
+  <sequence name="Main">
+    <operation name="processid">
+      <participant name="BPMetaDataInfoService"/>
+      <output message="BPMetaDataServiceTypeInputMessage">
+        <assign to="." from="*"></assign>
+      </output>
+      <input message="inmsg">
+        <assign to="ProcessID" from="/inmsg/BPDATA/WORKFLOW_ID/text()"></assign>
+      </input>
+    </operation>
+
+    <assign name="Assign" to="ProcessName">SCE_SFTPGet_EDI997_From_VoltEnergy</assign>
+     <assign name="Assign" to="MailName">SCE_SFTPGet_EDI997_From_VoltEnergy</assign>
+    <assign name="Assign" to="SystemName">EDI997_From_VoltEnergy</assign>
+    <operation name="Get Files">
+      <participant name="InlineInvokeBusinessProcessService"/>
+      <output message="InvokeBusinessProcessServiceTypeInputMessage">
+        <assign to="WFD_NAME">SCE_Generic_SFTPGet</assign>
+        <assign to="." from="*"></assign>
+      </output>
+      <input message="inmsg">
+        <assign to="." from="*"></assign>
+      </input>
+    </operation>
+
+    <onFault>
+      <sequence name="Sequence Start">
+        <spawn name="Spawn" ref="SCE_Generic_EMailOnError"/>
+
+      </sequence>
+    </onFault>
+  </sequence>
+</process>
+  

@@ -1,0 +1,24 @@
+<ROUTERULE name="TBD">
+				<FromMailBox>/voltenergy/Inbound</FromMailBox>
+				<archive_info>
+					<ArchiveFlag>Yes</ArchiveFlag>
+					<ArchiveFolder>/mft_EDI_Archive/EDI/voltenergy/Inbound</ArchiveFolder>
+				</archive_info>
+				<orgDir_info>
+					<FileNameAddition>_OrgMB-Riverside-SFTP-Inbound_OrgTime_</FileNameAddition>
+					<FileNameExtn>.txt</FileNameExtn>
+				</orgDir_info>
+				<destination_info>
+					<NewFileName/>
+					<ToMailBox1>/DocumentInbound/EDI</ToMailBox1>
+				</destination_info>
+				<mail_info>
+					<MailFlag>No</MailFlag>
+				</mail_info>
+				<DeleteMessage>Yes</DeleteMessage>
+			</ROUTERULE>
+
+
+
+
+	

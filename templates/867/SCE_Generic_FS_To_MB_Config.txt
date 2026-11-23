@@ -1,0 +1,47 @@
+<PROCNAME name="SCE_OB_EDI867_From_ODS">
+	<process_info>
+		<CollectionFileName>APPL_OB_867_*</CollectionFileName>
+		<CollectionFolder>/mft_ODS_867/OutboundData/SemiEdi</CollectionFolder>
+		<ArchiveFlag>Yes</ArchiveFlag>
+		<ArchiveTimeStamp></ArchiveTimeStamp>
+		<ArchiveFolder>/mft_ODS_867/OutboundData/SemiEdi/Archive</ArchiveFolder>
+		<PGPUnPackFlag></PGPUnPackFlag>
+		<KeyMapName></KeyMapName>
+		<PGPUnPackFileExtn></PGPUnPackFileExtn>
+		<MailboxPath>/DocumentOutbound/EDI</MailboxPath>
+		<ExtractableCount>1</ExtractableCount>
+	</process_info>
+	<mail_info>
+		<SendSuccessMail>No</SendSuccessMail>
+		<SendArchiveInfo>No</SendArchiveInfo>
+		<mail-mime-sender>scemftprod@sce.com</mail-mime-sender>
+		<mail-mime-recipient>scemftprod@sce.com</mail-mime-recipient>
+		<mail-mime-cc></mail-mime-cc>
+		<mail-mime-subject>EDI Outbound 867 File from ODS and placed in MFT Mailbox Successfully</mail-mime-subject>
+		<MailName>SCE_OB_EDI867_From_ODS</MailName>
+	</mail_info>
+</PROCNAME>
+<PROCNAME name="SCE_OB_EDI867_FROM_ODS_NEW">
+	<process_info>
+		<CollectionFileName>APPL_OB_867_*</CollectionFileName>
+		<CollectionFolder>/mft_ODS_867/OutboundData/SemiEdi</CollectionFolder>
+		<ArchiveFlag>Yes</ArchiveFlag>
+		<ArchiveTimeStamp></ArchiveTimeStamp>
+		<ArchiveFolder>/mft_ODS_867/OutboundData/SemiEdi/Archive</ArchiveFolder>
+		<PGPUnPackFlag></PGPUnPackFlag>
+		<KeyMapName></KeyMapName>
+		<PGPUnPackFileExtn></PGPUnPackFileExtn>
+		<MailboxPath>/DocumentOutbound/EDI</MailboxPath>
+		<MaxFilestoProcess>8</MaxFilestoProcess>
+		<ExtractableCount>1</ExtractableCount>
+	</process_info>
+	<mail_info>
+		<SendSuccessMail>No</SendSuccessMail>
+		<SendArchiveInfo>No</SendArchiveInfo>
+		<mail-mime-sender>scemftprod@sce.com</mail-mime-sender>
+		<mail-mime-recipient>scemftprod@sce.com</mail-mime-recipient>
+		<mail-mime-cc></mail-mime-cc>
+		<mail-mime-subject>EDI Outbound 867 File from ODS and placed in MFT Mailbox Successfully</mail-mime-subject>
+		<MailName>SCE_OB_EDI867_FROM_ODS_NEW</MailName>
+	</mail_info>
+</PROCNAME>

@@ -1,0 +1,23 @@
+Description: SCE_OB_EDI_FROM_PI_EMAIL
+XSL Style Sheet:
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="text"/>
+<xsl:template match="/">
+                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                      Details on File Transferred
+                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+***************************************************************************************************
+GIS Workflow ID    : <xsl:value-of select="/ProcessData/ProcessID"/>
+GIS BP Name        : <xsl:value-of select="/ProcessData/Process_Name"/>
+---------------------------------------------------------------------------------------------------
+Source File Name   : <xsl:value-of select="/ProcessData/FileName"/>
+Source Folder Name : <xsl:value-of select="/ProcessData/SCEPICONFIG/PROC_NAME/file_info/CollectionFolder"/>
+---------------------------------------------------------------------------------------------------
+Mailbox File Name  : <xsl:value-of select="/ProcessData/SCEPICONFIG/PROC_NAME/file_info/TargetMessageName"/>
+Mailbox Path Name  : <xsl:value-of select="/ProcessData/SCEPICONFIG/PROC_NAME/file_info/TargetMB"/>
+***************************************************************************************************
+
+This is a system generated message. If you have any questions, please send us a reply.
+</xsl:template>
+</xsl:stylesheet>

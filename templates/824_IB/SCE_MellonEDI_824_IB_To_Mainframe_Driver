@@ -1,0 +1,42 @@
+Description: SCE_MellonEDI_824_IB_To_Mainframe_Driver
+Business Process Definition:
+<process name="SCE_MellonEDI_824_IB_To_Mainframe_Driver">
+
+<!--*******************************************************************************************************
+Business Object Name        : SCE_MellonEDI_824_IB_To_Mainframe_Driver
+Business Object Description : This process calls generic MailBox to Mainframe Multiple Process to place 
+			      the file in Mainframe server
+Business Object Requirements: Modify SCE_Generic_Mailbox_To_Mainframe.xslt  to configure Transaction.
+
+History:                    Author         Date          Description 
+Initial Version             Krishna		07/13/2018      initial version
+
+Copyright 2014 - Southern California Edison
+
+*******************************************************************************************************-->
+
+  <sequence>
+    <assign to="Processname">SCE_MellonEDI_824_IB_To_Mainframe_Driver</assign>
+
+    <operation name="Invoke Mainframe Process">
+      <participant name="InvokeBusinessProcessService"/>
+      <output message="InvokeBusinessProcessServiceTypeInputMessage">
+        <assign to="." from="*"></assign>
+        <assign to="INVOKE_MODE">INLINE</assign>
+        <assign to="WFD_NAME">SCE_Generic_MailBox_To_Mainframe_Multiple</assign>
+      </output>
+      <input message="inmsg">
+        <assign to="." from="*"></assign>
+      </input>
+    </operation>
+
+    <onFault>
+      <sequence name="Sequence Start">
+        <assign name="Assign" to="MailName">SCE_MellonEDI_824_IB_To_Mainframe_Driver</assign>
+        <spawn name="Spawn" ref="SCE_Generic_EMailOnError"/>
+
+        </sequence>
+    </onFault>
+  </sequence>
+</process>
+  

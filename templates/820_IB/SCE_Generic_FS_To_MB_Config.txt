@@ -1,0 +1,23 @@
+</PROCNAME>
+<PROCNAME name="SCE_EDI820_From_SAPISU_To_MellonBank">
+	<process_info>
+		<CollectionFileName>APPL_OB_820_MELLON_RA.*.txt.pgp</CollectionFileName>
+		<CollectionFolder>/ISUTechData/FI/Mellon/Out</CollectionFolder>
+		<ArchiveFlag>No</ArchiveFlag>
+		<ArchiveTimeStamp></ArchiveTimeStamp>
+		<ArchiveFolder></ArchiveFolder>
+		<PGPUnPackFlag>Yes</PGPUnPackFlag>
+		<KeyMapName>mftadmin</KeyMapName>
+		<PGPUnPackFileExtn>.pgp</PGPUnPackFileExtn>
+		<MailboxPath>/DocumentOutbound/EDI</MailboxPath>
+		<ExtractableCount>1</ExtractableCount>
+	</process_info>
+	<mail_info>
+		<SendSuccessMail>Yes</SendSuccessMail>
+		<SendArchiveInfo>No</SendArchiveInfo>
+		<mail-mime-sender>scemftprod@sce.com</mail-mime-sender>
+		<mail-mime-recipient>scemftprod@sce.com, MSP-FICA@sce.com</mail-mime-recipient>
+		<mail-mime-cc></mail-mime-cc>
+		<mail-mime-subject>EDI Outbound 820 File from ISU placed in MFT Mailbox Successfully</mail-mime-subject>
+		<MailName>SCE_EDI820_From_SAPISU_To_MellonBank</MailName>
+	</mail_info>

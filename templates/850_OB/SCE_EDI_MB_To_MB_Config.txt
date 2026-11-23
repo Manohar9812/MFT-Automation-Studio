@@ -1,0 +1,20 @@
+<ROUTERULE name="31a6bf5a:12fe167e697:7c48">
+		<FromMailBox>/EDIStagingOutbound/OB_850_2040_SUPL_PO</FromMailBox>
+		<archive_info>
+		  <ArchiveFlag>No</ArchiveFlag>
+		  <ArchiveFolder></ArchiveFolder>
+		</archive_info>
+		<orgDir_info>
+		  <FileNameAddition></FileNameAddition>
+		  <FileNameExtn></FileNameExtn>
+		</orgDir_info>
+		<destination_info>
+			<NewFileName><xsl:value-of select="/ProcessData/Variables/Message/MessageName"/></NewFileName>
+			<ToMailBox2>/AS2/NubridgesVAN/Outbound</ToMailBox2>
+			<ExtractableCount2>1</ExtractableCount2>
+		</destination_info>
+		<mail_info>
+			<MailFlag>No</MailFlag>
+		</mail_info>
+		<DeleteMessage>Yes</DeleteMessage>
+	</ROUTERULE> 

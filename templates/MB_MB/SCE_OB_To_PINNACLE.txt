@@ -1,0 +1,13 @@
+</ROUTERULE> 
+	<ROUTERULE name="-600d617d:146636cdac6:-3269">
+		<FromMailBox>/CSS_SHARED_SUPPORT/SBR/Pinnacle/From_SCE/CSS</FromMailBox>
+		<ToMailBox>/CSS_SHARED_SUPPORT/PINNACLE/From_SCE/CSS</ToMailBox>
+		<ArchiveFlag>Yes</ArchiveFlag>
+		<ArchiveInfo>
+			<AddArchiveTimeStamp>Yes</AddArchiveTimeStamp>
+			<ArchivePath>/mft/archive/General/Pinnacle/Outbound</ArchivePath>
+		</ArchiveInfo>
+		<TargetFileTimeStamp>No</TargetFileTimeStamp>
+		<SendEmail>Yes</SendEmail>
+		<MailName>SCE_OB_To_PINNACLE</MailName>    
+	</ROUTERULE> 

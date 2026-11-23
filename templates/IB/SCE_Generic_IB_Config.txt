@@ -1,0 +1,28 @@
+<RULEID name="3e78b75b:19a7fbd892d:-11b1">  
+		<process_info>
+			<ProcessName>SCE_IB_6390_CooperPowerSystems</ProcessName>
+			<MailboxPath>/CooperPowerSystems/DropOff</MailboxPath>
+			<MessageNamePattern>COOPERPOWER_INXFMR*</MessageNamePattern>
+			<InboundFileExtn>unknown</InboundFileExtn>
+			<DeleteMail>Yes</DeleteMail>
+			<PGPUnPackFlag>No</PGPUnPackFlag>
+			<KeyMapName>mftadmin</KeyMapName>
+			<TimeStampFlag>Yes</TimeStampFlag>
+			<ArchiveFlag>Yes</ArchiveFlag>
+			<ArchiveFolder>/mft/archive/General/CooperPower/DropOff</ArchiveFolder>
+			<TargetFolder>/FTI/TransformerSuppliers/DropOff</TargetFolder>
+			<TargetFileName>unknown</TargetFileName>
+			<TargetFileExtn>unknown</TargetFileExtn> 
+			<TargetFileCheck>Yes</TargetFileCheck>
+		</process_info>
+		<mail_info>
+			<MailFlag>Yes</MailFlag>
+			<SendArchiveInfo>No</SendArchiveInfo>
+			<MailFormat>HTML</MailFormat>
+			<mail-mime-sender>scemftprod@sce.com</mail-mime-sender>
+			<mail-mime-recipient>INFOSYS.SAPPIPOSUPPORT@sce.com</mail-mime-recipient>
+			<mail-mime-cc></mail-mime-cc>
+			<mail-mime-subject>SCE_IB_6390_CooperPowerSystems - File Received Successfully</mail-mime-subject>
+			<MailName>SCE_IB_6390_CooperPowerSystems</MailName>
+		</mail_info>
+</RULEID>

@@ -1,0 +1,28 @@
+	
+Description: Added PiSupport email id for 852
+XSL Style Sheet:
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:param name="STATUS"/>
+<xsl:template match="/">
+<SCEPICONFIG process="SCE">
+	<PROC_NAME name="SCE_OB_850_SUPL_PO">
+		<file_info>
+			<CollectionFolder>/FTI/GENTRAN/PickUp</CollectionFolder>
+			<FileName>PurchaseOrders*.txt</FileName>
+			<TargetMB>/DocumentOutbound/EDI</TargetMB>
+			<TargetMessageName>APPL_OB_850_SUPL_PO.txt</TargetMessageName>
+		</file_info>
+		<mail_info>
+			<SendSuccessMail>Yes</SendSuccessMail>
+			<SendArchiveInfo>Yes</SendArchiveInfo>
+			<MailFormat>TEXT</MailFormat>
+			<mail-mime-sender>scemftprod@sce.com</mail-mime-sender>
+			<mail-mime-recipient>pisupport@sce.com</mail-mime-recipient>
+			<mail-mime-cc>scemftprod@sce.com</mail-mime-cc>
+			<mail-mime-subject>SCE_ERP_OB_9028_PO_SUPPLIERS_MFT Successful</mail-mime-subject>
+		</mail_info>
+	</PROC_NAME>
+</SCEPICONFIG>
+</xsl:template>
+</xsl:stylesheet>

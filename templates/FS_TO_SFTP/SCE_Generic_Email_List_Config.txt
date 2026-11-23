@@ -1,0 +1,11 @@
+<PROCNAME name="SCE_OB_MFTWIN_To_ExactTarget_Driver">
+		<EMailNotificationXSLT>SCE_Generic_SFTPPut_From_MB_Or_FS_Email_Body</EMailNotificationXSLT>
+		<mail_info>
+			<MailFlag>Yes</MailFlag>
+			<SendArchiveInfo>Yes</SendArchiveInfo>
+			<MailFormat>TEXT</MailFormat>
+			<mail-mime-sender>scemftprod@sce.com</mail-mime-sender>
+			<mail-mime-recipient>scemftprod@sce.com</mail-mime-recipient>
+			<mail-mime-cc></mail-mime-cc>
+			<mail-mime-subject>SCE_OB_MFTWIN_To_ExactTarget has been transmitted successfully</mail-mime-subject>
+		</mail_info>

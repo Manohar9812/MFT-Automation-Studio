@@ -1,0 +1,24 @@
+</PROCNAME>
+<PROCNAME name="SCE_OB_EDI814_From_ISU">
+		<process_info>
+			<CollectionFileName>APPL_OB_814_DASR*.txt.pgp</CollectionFileName>
+			<CollectionFolder>/ISUTechDataQU/IDEX/EDI/814/out</CollectionFolder>
+			<ArchiveFlag>No</ArchiveFlag>
+			<ArchiveTimeStamp></ArchiveTimeStamp>
+			<ArchiveFolder></ArchiveFolder>
+			<PGPUnPackFlag>Yes</PGPUnPackFlag>
+			<KeyMapName>mftadmin</KeyMapName>
+			<PGPUnPackFileExtn>.pgp</PGPUnPackFileExtn>
+			<MailboxPath>/DocumentOutbound/EDI</MailboxPath>
+			<ExtractableCount>1</ExtractableCount>
+		</process_info>
+		<mail_info>
+			<SendSuccessMail>No</SendSuccessMail>
+			<SendArchiveInfo>No</SendArchiveInfo>
+			<mail-mime-sender>scemftsys@sce.com</mail-mime-sender>
+			<mail-mime-recipient>scemftsys@sce.com</mail-mime-recipient>
+			<mail-mime-cc></mail-mime-cc>
+			<mail-mime-subject>EDI Outbound 814 File from ISU placed in MFT Mailbox Successfully</mail-mime-subject>
+			<MailName>SCE_OB_EDI814_From_ISU</MailName>
+		</mail_info>
+</PROCNAME>

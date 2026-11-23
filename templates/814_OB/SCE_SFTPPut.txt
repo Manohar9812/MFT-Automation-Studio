@@ -1,0 +1,9 @@
+<SYSTEM name="VoltEnergy_814">
+		<beginsession>
+			<SFTPClientAdapter>SCE_SFTP_CLIENT_DMZ1_GROUP</SFTPClientAdapter>
+			<ProfileId>TBD</ProfileId>
+		</beginsession>	
+		<changedir>
+			<Directory>/Outbound</Directory>
+		</changedir>		
+	</SYSTEM> 

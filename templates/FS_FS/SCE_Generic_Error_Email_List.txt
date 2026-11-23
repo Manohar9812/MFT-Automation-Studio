@@ -1,0 +1,8 @@
+<ERRORMAIL name="SCE_IB_ABS_TO_SAPISU">
+	<email_info>
+		<mail-format>HTML</mail-format>
+		<mail-mime-sender>scemftprod@sce.com</mail-mime-sender>
+		<mail-mime-recipient>ManagedServicesMFTSupport@sce.com, scemftprod@sce.com</mail-mime-recipient>
+		<mail-mime-cc></mail-mime-cc>
+		<mail-mime-subject>SCE_IB_ABS_TO_SAPISU- Failed</mail-mime-subject>
+	</email_info>

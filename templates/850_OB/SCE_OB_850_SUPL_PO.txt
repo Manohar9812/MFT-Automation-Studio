@@ -1,0 +1,68 @@
+	
+Description: updated by archive manager
+Business Process Definition:
+<process name="SCE_OB_850_SUPL_PO">
+<!--***********************************************************************************************
+Business Object Name: SCE_OB_850_SUPL_PO
+Business Object Description: This Driver BP calls the SCE_EDI_OB_From_PI BP to collect
+                             the PurchaseOrders file(s) from SAP share mount.
+
+History:                    Author         Date          Description 
+Initial Version             Ramana Jajula  05/03/11      initial version
+
+Copyright 2010 - Southern California Edison
+
+************************************************************************************************-->
+  
+  <sequence name="Sequence Start">
+     <assign name="Assign" to="Process_Name">SCE_OB_850_SUPL_PO</assign>
+    
+     <operation name="GetBPInfo">
+      <participant name="BPMetaDataInfoService"/>
+      <output message="BPMetaDataServiceTypeInputMessage">
+        <assign to="DISPOSITION">FALSE</assign>
+        <assign to="LINKAGE">FALSE</assign>
+        <assign to="." from="*"></assign>
+      </output>
+      <input message="inmsg">
+        <assign to="/ProcessData/ProcessID" from="BPDATA/WORKFLOW_ID" append="true"></assign>
+      </input>
+     </operation>
+
+
+      <sequence name="InvokeBP">
+        <operation name="CallGenericBP">
+          <participant name="InlineInvokeSubProcessService"/>
+          <output message="InvokeSubProcessServiceTypeInputMessage">
+            <assign to="WFD_NAME">SCE_EDI_OB_From_PI</assign>
+            <assign to="." from="*"></assign>
+          </output>
+          <input message="inmsg">
+            <assign to="." from="*"></assign>
+          </input>
+        </operation>
+      </sequence>
+    <onFault>
+      <sequence name="Sequence Start">
+        <assign name="Assign" to="MailName" from="/ProcessData/Process_Name/text()"></assign>
+        <spawn name="Spawn" ref="SCE_Generic_EMailOnError"/>
+
+        <operation name="BPException">
+          <participant name="BPExceptionService"/>
+          <output message="BPExceptionServiceTypeInputMessage">
+            <assign to="exceptionCode">ERROR</assign>
+            <assign to="." from="*"></assign>
+          </output>
+          <input message="inmsg">
+            <assign to="." from="*"></assign>
+          </input>
+        </operation>
+
+      </sequence>
+    </onFault>
+  </sequence>
+</process>
+
+ 
+ 
+   

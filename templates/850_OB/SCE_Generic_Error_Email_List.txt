@@ -1,0 +1,9 @@
+<ERRORMAIL name="SCE_OB_850_SUPL_PO">
+		<email_info>
+			<mail-format>TEXT</mail-format>
+			<mail-mime-sender>scemftprod@sce.com</mail-mime-sender>
+			<mail-mime-recipient>ManagedServicesMFTSupport@sce.com, scemftprod@sce.com, INFOSYS.SAPPIPOSUPPORT@sce.com</mail-mime-recipient>
+			<mail-mime-cc></mail-mime-cc>
+			<mail-mime-subject>EDI-OB-Supplier PO - Failed</mail-mime-subject>
+		</email_info>
+	</ERRORMAIL>

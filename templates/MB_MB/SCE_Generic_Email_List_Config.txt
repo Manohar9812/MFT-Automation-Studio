@@ -1,0 +1,12 @@
+<PROCNAME name="SCE_OB_To_PINNACLE">
+		<EMailNotificationXSLT>SCE_Generic_Mailbox_To_Mailbox_Email_Body</EMailNotificationXSLT>
+		<mail_info>
+			<MailFlag>Yes</MailFlag>
+			<SendArchiveInfo>Yes</SendArchiveInfo>
+			<MailFormat>TEXT</MailFormat>
+			<mail-mime-sender>scemftsys@sce.com</mail-mime-sender>
+			<mail-mime-recipient>scemftsys@sce.com</mail-mime-recipient>
+			<mail-mime-cc></mail-mime-cc>
+			<mail-mime-subject>SCE to Pinnacle - File moved to Pinnacle mailbox successfully</mail-mime-subject>
+		</mail_info>
+	</PROCNAME>

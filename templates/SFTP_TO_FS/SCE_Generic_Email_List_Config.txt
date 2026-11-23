@@ -1,0 +1,12 @@
+<PROCNAME name="SCE_SFTPGET_Dovetail_Case_Management_Master_Raw_Data_to_HRCM">
+		<EMailNotificationXSLT>SCE_Generic_SFTPGet_SuccessEmailBodyWithArchiveInf</EMailNotificationXSLT>
+		<mail_info>
+			<MailFlag>No</MailFlag>
+			<SendArchiveInfo></SendArchiveInfo>
+			<MailFormat>TEXT</MailFormat>
+			<mail-mime-sender>scemftprod@sce.com</mail-mime-sender>
+			<mail-mime-recipient>scemftprod@sce.com</mail-mime-recipient>
+			<mail-mime-cc></mail-mime-cc>
+			<mail-mime-subject>SCE_SFTPGET_Dovetail_Case_Management_Master_Raw_Data_to_HRCM</mail-mime-subject>
+		</mail_info>
+		</PROCNAME>

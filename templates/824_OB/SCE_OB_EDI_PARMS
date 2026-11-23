@@ -1,0 +1,18 @@
+<EDIPROCESS name="APPL_OB_824_UDC_BILL_RESPONSE">
+		<ob_info>
+			<app-archive-name><xsl:value-of select="concat('APPL_OB_824_UDC_BILL_RESPONSE.',substring-after(translate(/ProcessData/Variables/MessageName/text(), 'txt',''),'APPL_OB_824_UDC_BILL_RESPONSE.'),$DateTime,'.txt')"/></app-archive-name>
+			<app-archive-path>/mft_EDI_Archive/APPL/OB_824_3070_UDC_BILL_RESPONSE</app-archive-path>
+			<edi-archive-name><xsl:value-of select="concat('EDI_OB_824_UDC_BILL_RESPONSE.',substring-after(translate(/ProcessData/Variables/MessageName/text(), 'txt',''),'APPL_OB_824_UDC_BILL_RESPONSE.'),$DateTime,'.txt')"/></edi-archive-name>
+			<edi-archive-path>/mft_EDI_Archive/EDI/OB_824_3070_UDC_BILL_RESPONSE</edi-archive-path>
+			<nia-archive-flag>Yes</nia-archive-flag>
+		    <nia-archive-name><xsl:value-of select="concat('EDI_OB_824_UDC_BILL_RESPONSE.',substring-after(translate(/ProcessData/Variables/MessageName/text(), 'txt',''),'APPL_OB_824_UDC_BILL_RESPONSE.'),$DateTime,'.txt')"/></nia-archive-name>
+		    <nia-archive-path>/mft_NIA_Reporting/OB_824</nia-archive-path>	
+			<temp-file-name><xsl:value-of select="concat(substring-before(/ProcessData/Variables/MessageName/text(),'.'),/ProcessData/MyProcess/BPDATA/WORKFLOW_ID,'.txt')"/></temp-file-name>
+			<temp-file-path>/mft/tempedi/OB/824</temp-file-path>
+			<mb-staging-name><xsl:value-of select="concat('EDI_OB_824_UDC_BILL_RESPONSE.',substring-after(translate(/ProcessData/Variables/MessageName/text(), 'txt',''),'APPL_OB_824_UDC_BILL_RESPONSE.'),'txt')"/></mb-staging-name>
+			<mb-staging-dir>/EDIStagingOutbound/OB_824_3070_UDC_BILL_RESPONSE</mb-staging-dir>
+			<mb-retransmit-name><xsl:value-of select="concat('EDI_OB_824_UDC_BILL_RESPONSE.',substring-after(translate(/ProcessData/Variables/MessageName/text(), 'txt',''),'APPL_OB_824_UDC_BILL_RESPONSE.'),'txt')"/></mb-retransmit-name>
+			<mb-retransmit-dir>/EDIRetransmit/OB_824_3070_UDC_BILL_RESPONSE</mb-retransmit-dir>
+			<map_name>SCE_OB_824_3070_GENERIC</map_name>
+		</ob_info>
+	</EDIPROCESS>

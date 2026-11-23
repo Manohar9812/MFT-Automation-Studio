@@ -1,0 +1,162 @@
+<process name="SCE_EDI_OB_From_PI">
+<!--***********************************************************************************************
+Business Object Name: SCE_EDI_OB_From_PI
+Business Object Description: This BP collects the file from SAP share mount and drops it in the GIS malbox.
+
+History:                    Author         Date          Description 
+Initial Version             Ramana Jajula  05/03/11      initial version
+
+Copyright 2010 - Southern California Edison
+
+************************************************************************************************-->
+  <rule name="pdExists">
+    <condition>count(//PrimaryDocument) &gt; 0</condition>
+  </rule>
+
+  <sequence name="Sequence Start">
+  	 <operation name="ReadProcessDataFromXslt">
+          <participant name="XSLTService"/>
+          <output message="XSLTServiceTypeInputMessage">
+            <assign to="xslt_name">SCE_Generic_OB_To_PI</assign>
+            <assign to="xml_input_from">ProcData</assign>
+            <assign to="input_pd_xpath">/ProcessData</assign>
+            <assign to="xml_input_validation">NO</assign>
+            <assign to="." from="*"></assign>
+          </output>
+          <input message="inmsg">
+            <assign to="ReadXSLTResults" from="*"></assign>
+          </input>
+        </operation>
+
+      <operation name="loadProcDatafromxslt">
+          <participant name="XMLEncoder"/>
+          <output message="XMLEncoderTypeInputMessage">
+            <assign to="mode">xml_to_process_data</assign>
+            <assign to="output_to_process_data">YES</assign>
+            <assign to="validate_xml">NO</assign>
+            <assign to="." from="ReadXSLTResults/PrimaryDocument"></assign>
+          </output>
+          <input message="inmsg">
+            <assign to="." from="*"></assign>
+          </input>
+        </operation>
+
+      <operation name="releasexsltdoc">
+          <participant name="ReleaseService"/>
+          <output message="ReleaseServiceTypeInputMessage">
+            <assign to="TARGET">/ProcessData/ReadXSLTResults/PrimaryDocument</assign>
+            <assign to="." from="*"></assign>
+          </output>
+          <input message="inmsg">
+            <assign to="." from="*"></assign>
+          </input>
+        </operation>
+
+      <operation name="releaseotherPROC_NAME">
+          <participant name="ReleaseService"/>
+          <output message="ReleaseServiceTypeInputMessage">
+            <assign to="TARGET">SCEPICONFIG/PROC_NAME[@name!=/ProcessData/Process_Name/text()]</assign>
+            <assign to="." from="*"></assign>
+          </output>
+          <input message="inmsg">
+            <assign to="." from="*"></assign>
+          </input>
+        </operation>
+   
+     <operation name="File System Adapter">
+      <participant name="SCE_FSA"/>
+      <output message="FileSystemInputMessage">
+        <assign to="." from="*"></assign>
+        <assign to="Action">FS_COLLECT</assign>
+        <assign to="collectionFolder" from="SCEPICONFIG/PROC_NAME/file_info/CollectionFolder/text()"></assign>
+        <assign to="filter" from="SCEPICONFIG/PROC_NAME/file_info/FileName/text()"></assign>
+        <assign to="collectZeroByteFiles">true</assign>
+        <assign to="assignFilename">false</assign>
+        <assign to="collectMultiple">true</assign>
+        <assign to="extractionFolder">.</assign>
+        <assign to="deleteAfterCollect">true</assign>
+        <assign to="noFilesSetSuccess">true</assign>
+        <assign to="concatenateFiles">true</assign>
+      </output>
+      <input message="inmsg">
+        <assign to="." from="*"></assign>
+      </input>
+    </operation>
+
+    <choice name="File Exists">
+      <select>
+        <case ref="pdExists" activity="MBAdd"/>
+      </select>
+
+      <sequence name="MBAdd">
+        <operation name="Mailbox Add Service">
+              <participant name="MailboxAdd"/>
+              <output message="MailboxAddServiceTypeInputMessage">
+                <assign to="." from="*"></assign>
+                <assign to="MessageName" from="SCEPICONFIG/PROC_NAME/file_info/TargetMessageName/text()"></assign>
+                <assign to="MailboxPath" from="SCEPICONFIG/PROC_NAME/file_info/TargetMB/text()"></assign>
+              </output>
+              <input message="inmsg">
+                <assign to="." from="*"></assign>
+              </input>
+            </operation>
+            
+         <operation name="readEmailBodyxsltdoc">
+            <participant name="XSLTService"/>
+            <output message="XSLTServiceTypeInputMessage">
+              <assign to="xslt_name">SCE_OB_EDI_FROM_PI_EMAIL</assign>
+              <assign to="xml_input_from">ProcData</assign>
+              <assign to="input_pd_xpath">/ProcessData</assign>
+              <assign to="xml_input_validation">NO</assign>
+              <assign to="." from="*"></assign>
+            </output>
+            <input message="inmsg">
+              <assign to="." from="*"></assign>
+            </input>
+          </operation>
+
+       <operation name="Mail Mime Service">
+          <participant name="MailMimeService"/>
+          <output message="MailMimeServiceInputMessage">
+            <assign to="mail-mime-operation">build</assign>
+            <assign to="mail-mime-use-doc-area">false</assign>
+            <assign to="mail-mime-subject-encoding">UTF-8</assign>
+            <assign to="mail-mime-body">true</assign>
+            <assign to="." from="SCEPICONFIG/PROC_NAME/mail_info/*"></assign>
+            <assign to="." from="*"></assign>
+          </output>
+          <input message="inmsg">
+            <assign to="." from="*"></assign>
+          </input>
+        </operation>
+
+        <operation name="SMTP Send Email">
+          <participant name="SMTP_SEND_ADAPTER"/>
+          <output message="Xout">
+            <assign to="." from="*"></assign>
+            <assign to="xport-smtp-mailfrom" from="&apos;scemftprod@sce.com&apos;"></assign>
+            <assign to="xport-smtp-mailhost" from="&apos;mail01.sce.com&apos;"></assign>
+            <assign to="b2b-raw-message">true</assign>
+            <assign to="xport-smtp-mailport">25</assign>
+            <assign to="xport-b2b-mode">off</assign>
+          </output>
+          <input message="Xin">
+            <assign to="." from="*"></assign>
+          </input>
+        </operation>
+
+
+      </sequence>
+    </choice>
+    <onFault>
+      <sequence name="Sequence Start">
+        <assign name="Assign" to="MailName" from="/ProcessData/Process_Name/text()"></assign>
+        <spawn name="Spawn" ref="SCE_Generic_EMailOnError"/>
+      </sequence>
+    </onFault>
+  </sequence>
+</process>
+
+ 
+ 
+   

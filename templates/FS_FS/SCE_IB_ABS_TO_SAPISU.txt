@@ -1,0 +1,45 @@
+	
+Description: SCE_IB_ABS_TO_SAPISU
+Business Process Definition:
+<!--*******************************************************************************************************
+Business Object Name        : SCE_IB_ABS_TO_SAPISU
+Business Object Description : This interface moves the SyncUpRequest file from ABS NAS folder to SAP ISU directory using FS to FS
+
+History:                    Author		 Date          Description 
+Initial Version             Daniel 	 04/01/2021    initial version
+
+Copyright 2010 - Southern California Edison
+
+*******************************************************************************************************-->
+<process name="SCE_IB_ABS_TO_SAPISU">
+  <sequence name="Sequence Start">
+    <operation name="DM">
+      <participant name="AssignService"/>
+      <output message="outmsg">
+        <assign to="System">SCE_IB_ABS_TO_SAPISU</assign>
+        <assign to="MailName">SCE_IB_ABS_TO_SAPISU</assign>
+        <assign to="ProcessName">SCE_IB_ABS_TO_SAPISU</assign>
+      </output>
+      <input message="inmsg">
+        <assign to="." from="*"></assign>
+      </input>
+    </operation>
+
+    <operation name="SCE_Generic_FS_To_FS">
+      <participant name="InvokeBusinessProcessService"/>
+      <output message="InvokeBusinessProcessServiceTypeInputMessage">
+        <assign to="INVOKE_MODE">INLINE</assign>
+        <assign to="WFD_NAME">SCE_Generic_FS_To_FS</assign>
+        <assign to="." from="*"></assign>
+      </output>
+      <input message="inmsg">
+        <assign to="." from="*"></assign>
+      </input>
+    </operation>
+    <onFault>
+      <sequence name="Sequence Start">
+        <assign name="Assign" to="MailName" from="//MailName/text()"></assign>
+        <spawn name="Spawn" ref="SCE_Generic_EMailOnError"/>
+
+        </sequence>
+    </onFault>

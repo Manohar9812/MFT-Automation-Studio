@@ -1,0 +1,20 @@
+<EDIMAIL name="APPL_OB_852_SUPL_PA_Error">                                                                       
+		<email_info>                                                                                                    
+			<mail-format>TEXT</mail-format>                                                                               
+			<mail-mime-sender>scemftprod@sce.com</mail-mime-sender>                                                        
+			<mail-mime-recipient>scemftprod@sce.com</mail-mime-recipient>
+			<mail-mime-cc></mail-mime-cc>                                                                                 
+			<mail-mime-subject>EDI-OB-852-SUPL-PA - Failed <xsl:value-of select="$MySubject"/> </mail-mime-subject>
+			<mail-mime-use-doc-area>false</mail-mime-use-doc-area>                        
+		</email_info>
+		</EDIMAIL>  
+		<EDIMAIL name="SCE_OB_852_4010_GENERIC_Error"> <!--Translation Error-->                                                                      
+		<email_info>                                                                                                    
+			<mail-format>TEXT</mail-format>                                                                               
+			<mail-mime-sender>scemftprod@sce.com</mail-mime-sender>                                                        
+			<mail-mime-recipient>shahuraj.shirure@sce.com</mail-mime-recipient>
+			<mail-mime-cc>scemftprod@sce.com, selena.landero@sce.com, matt.mckinley@sce.com, chris.cammarata@sce.com</mail-mime-cc>                                                                                 
+			<mail-mime-subject>EDI-OB-852-SUPL-PA - Translation Failed <xsl:value-of select="$MySubject"/> </mail-mime-subject>
+			<mail-mime-use-doc-area>false</mail-mime-use-doc-area>                        
+		</email_info>                                                                                                   
+	</EDIMAIL> 

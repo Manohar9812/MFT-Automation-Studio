@@ -1,0 +1,16 @@
+    <EDIPROCESS name="VoltEnergy-SFTP-Inbound_997">
+		<ib_info>
+			<edi997-archive-name><xsl:value-of select="concat('EDI_OB_997.',$DateTime,'.txt')"/></edi997-archive-name>
+			<edi997-archive-path>/mft_EDI_Archive/EDI/OB_997/VoltEnergy</edi997-archive-path>
+
+		    <nia-ob-archive-name><xsl:value-of select="concat('EDI_OB_997.',$DateTime,'.txt')"/></nia-ob-archive-name>
+		    <nia-ob-archive-path>/mft_NIA_Reporting/OB_997</nia-ob-archive-path>				
+			<ob997-staging-dir>/EDIStagingOutbound/OB_997/VoltEnergy</ob997-staging-dir>
+			<ob997-retransmit-dir>/EDIRetransmit/OB_997/VoltEnergy</ob997-retransmit-dir>
+			<ib997-archive-name><xsl:value-of select="concat('EDI_IB_997.',$DateTime,'.txt')"/></ib997-archive-name>
+			<ib997-archive-path>/mft_EDI_Archive/EDI/IB_997/VoltEnergy/Reconciliation</ib997-archive-path>
+
+		    <nia-ib-archive-name><xsl:value-of select="concat('EDI_IB_997.',$DateTime,'.txt')"/></nia-ib-archive-name>
+		    <nia-ib-archive-path>/mft_NIA_Reporting/IB_997</nia-ib-archive-path>				
+		</ib_info>
+	</EDIPROCESS>	

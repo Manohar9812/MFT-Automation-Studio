@@ -1,0 +1,46 @@
+<process name="SCE_OB_MFTWIN_To_ExactTarget_Driver">
+<!--*******************************************************************************************************
+Business Object Name        : SCE_OB_MFTWIN_To_ExactTarget_Driver
+Business Object Description : This Process transfers files from MFTWIN to Exact Target 
+                              
+History:                    Author         	Date          Description
+Initial Version             Krishna		  05/17/2018    Initial version
+
+Copyright 2015 - Southern California Edison
+
+
+*******************************************************************************************************-->
+  
+<sequence name="Sequence Start">
+    <operation name="processid">
+      <participant name="BPMetaDataInfoService"/>
+      <output message="BPMetaDataServiceTypeInputMessage">
+        <assign to="." from="*"></assign>
+      </output>
+      <input message="inmsg">
+        <assign to="ProcessID" from="/inmsg/BPDATA/WORKFLOW_ID/text()"></assign>
+      </input>
+    </operation>
+
+    <assign name="Assign" to="ProcessName">SCE_OB_MFTWIN_To_ExactTarget_Driver</assign>
+    <assign name="Assign" to="MailName">SCE_OB_MFTWIN_To_ExactTarget_Driver</assign>
+    
+    <operation name="CallGenericBP">
+      <participant name="InlineInvokeSubProcessService"/>
+      <output message="InvokeSubProcessServiceTypeInputMessage">
+        <assign to="WFD_NAME">SCE_Generic_SFTPPut_From_MB_Or_FS</assign>
+        <assign to="." from="*"></assign>
+      </output>
+      <input message="inmsg">
+        <assign to="." from="*"></assign>
+      </input>
+    </operation>
+
+    <onFault>
+      <sequence name="Sequence Start">
+        <spawn name="Spawn" ref="SCE_Generic_EMailOnError"/>
+
+      </sequence>
+    </onFault>
+  </sequence>
+</process>

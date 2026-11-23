@@ -1,0 +1,4 @@
+<EXTRACT name="/DocumentOutbound/EDI">
+		<Processing_BP>SCE_Document_Outbound</Processing_BP>
+		<Process_Name></Process_Name>
+	</EXTRACT>

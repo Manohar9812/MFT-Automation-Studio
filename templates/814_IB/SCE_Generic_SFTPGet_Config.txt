@@ -1,0 +1,30 @@
+	<SYSTEM name="VoltEnergy_Inbound_814">
+		<process_info>
+			<beginsession>
+				<ProfileId>543217198d81c7e6anode1</ProfileId>
+				<SFTPClientAdapterName>SCE_SFTP_CLIENT_DMZ1_GROUP</SFTPClientAdapterName>
+			</beginsession>
+			<changedir>
+				<Directory>/INBOUND</Directory>
+			</changedir>
+			<RemoteFileName>*</RemoteFileName>									
+			<DeleteRemoteFile>Yes</DeleteRemoteFile>
+			<ArchiveFlag>No</ArchiveFlag>
+			<AddArchiveTimeStamp>No</AddArchiveTimeStamp>
+			<ArchivePath></ArchivePath> 
+			<InboundFileExtn>unknown</InboundFileExtn>
+			<PGPUnPackFlag>Yes</PGPUnPackFlag>
+			<PGPExtn>.pgp</PGPExtn>
+			<KeyMapName>mftadmin</KeyMapName>
+			<FileDestinationName>MB</FileDestinationName>
+			<AddTargetTimeStamp>No</AddTargetTimeStamp>
+			<TargetFileName>unknown</TargetFileName>
+			<TargetFileCheck>No</TargetFileCheck>
+			<TargetFileExtn>unknown</TargetFileExtn>
+			<TargetFilePath>/voltenergy/Inbound</TargetFilePath>Need to create path InTEST
+			<ExtractableCount></ExtractableCount>
+			<SendEmail>No</SendEmail>
+			<SendArchiveInfo></SendArchiveInfo>
+ 		</process_info>
+	</SYSTEM>
+	

@@ -1,0 +1,59 @@
+Description: SCE_OB_EDI824_From_ISU
+Business Process Definition:
+<!--*******************************************************************************************************
+Business Object Name        : SCE_OB_EDI824_From_ISU
+Business Object Description : This Business Process Handles EDI Outbound 824 file transfer to MFT mailbox from ISU directory 
+                              by calling Generic FS to MB BP
+
+History:                    Author		 Date          Description 
+Initial Version             Daniel		 04/01/2021    initial version
+
+Copyright 2010 - Southern California Edison
+
+*******************************************************************************************************-->
+<process name="SCE_OB_EDI824_From_ISU">
+  <sequence name="Sequence Start">
+    <operation name="processid">
+      <participant name="BPMetaDataInfoService"/>
+      <output message="BPMetaDataServiceTypeInputMessage">
+        <assign to="." from="*"></assign>
+      </output>
+      <input message="inmsg">
+        <assign to="ProcessID" from="/inmsg/BPDATA/WORKFLOW_ID/text()"></assign>
+      </input>
+    </operation>
+
+
+     <operation name="OSBU">
+      <participant name="AssignService"/>
+      <output message="outmsg">
+        <assign to="MailName">SCE_OB_EDI824_From_ISU</assign>
+        <assign to="ProcessName">SCE_OB_EDI824_From_ISU</assign>
+      </output>
+      <input message="inmsg">
+        <assign to="." from="*"></assign>
+      </input>
+    </operation>
+
+    <operation name="SCE_Generic_FS_To_MB">
+      <participant name="InvokeBusinessProcessService"/>
+      <output message="InvokeBusinessProcessServiceTypeInputMessage">
+        <assign to="INVOKE_MODE">INLINE</assign>
+        <assign to="WFD_NAME">SCE_Generic_FS_To_MB</assign>
+        <assign to="." from="*"></assign>
+      </output>
+      <input message="inmsg">
+        <assign to="." from="*"></assign>
+      </input>
+    </operation>
+
+    <onFault>
+      <sequence name="Sequence Start">
+        <assign name="Assign" to="MailName" from="//MailName/text()"></assign>
+        <spawn name="Spawn" ref="SCE_Generic_EMailOnError"/>
+
+      </sequence>
+    </onFault>
+  </sequence>
+</process>
+  

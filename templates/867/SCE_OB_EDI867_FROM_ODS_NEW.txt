@@ -1,0 +1,932 @@
+Description: This Business Process Handles Limited number of EDI Outbound 867 file transfer to MFT from ODS by calling Generic FS to MB BP
+Business Process Definition:
+<!--*******************************************************************************************************
+Business Object Name        : SCE_OB_EDI867_From_ODS_NEW
+Business Object Description : This Business Process Handles Limited number of EDI Outbound 867 file transfer to MFT from ODS  by calling Generic FS to MB BP
+
+History:                    Author		 	Date               Description 
+Initial Version            Chaitanya	  10/19/2023      	initial version
+
+Copyright 2010 - Southern California Edison
+
+*******************************************************************************************************-->
+
+<process name="SCE_OB_EDI867_FROM_ODS_NEW">
+
+  <rule name="Any Files Pickups">
+    
+    <condition>number(/ProcessData/FSA_DocumentCount) &gt; 0 </condition>
+   
+  </rule>
+
+  <rule name="Multiple Files Pickups">
+  	
+    <condition>number(/ProcessData/countIndex) &lt;= number(MaxFilestoProcess)</condition>
+    
+  </rule>
+
+  <rule name="IsTimestampFlag">
+    <condition>/ProcessData/TimestampFlag/text()=&apos;Yes&apos;</condition>
+  </rule>
+
+  <rule name="Send Email">
+    <condition>/ProcessData/SCEMFTOB/PROCNAME/mail_info/SendSuccessMail/text()=&apos;Yes&apos;</condition>
+  </rule>
+
+  <rule name="InFileExtn">
+    <condition>/ProcessData/InFileExtn/text()=&apos;unknown&apos;</condition>
+  </rule>
+
+  <rule name="ArchiveFlag">
+    <condition>SCEMFTOB/PROCNAME/process_info/ArchiveFlag/text()=&apos;Yes&apos;</condition>
+  </rule>
+
+  <!-- Added by Mathi on 10/05/12 - Starts here -->
+  <rule name="EndPointCheck">
+    <condition>SCEMFTOB/PROCNAME/process_info/IsEndPointMailBox/text()=&apos;Yes&apos;</condition>
+  </rule>
+  <!-- Added by Mathi on 10/05/12 - Ends here -->
+
+  <!-- Added by Mathi on 11/14/13 - Starts here -->
+  <rule name="DeleteFileFromSource">
+    <condition>SCEMFTOB/PROCNAME/process_info/DeleteSourceFile/text()=&apos;No&apos;</condition>
+  </rule>
+  <!-- Added by Mathi on 11/14/13 - Ends here -->
+
+  <!-- Added by Mathi on 11/27/13 - Starts here -->
+  <rule name="PGPRequired">
+    <condition>SCEMFTOB/PROCNAME/process_info/PGPPackFlag/text()=&apos;Yes&apos;</condition>
+  </rule>
+  <!-- Added by Mathi on 11/27/13 - Ends here -->
+
+	<!-- Added by Mathi on 01/30/14 - Starts Here -->
+  <rule name="ZIPRequired">
+    <condition>SCEMFTOB/PROCNAME/process_info/ZIPFlag/text()=&apos;Yes&apos;</condition>
+  </rule>	
+	
+  <rule name="InvokeBPAtEnd">
+    <condition>SCEMFTOB/PROCNAME/process_info/TriggerAnotherBPAtTheEnd/text()=&apos;Yes&apos;</condition>
+  </rule>
+
+  <rule name="IsThisHTTPTrigger">
+    <condition>string-length(/ProcessData/ParentProcessData/SCE_Remote_Invoke/Header/Context) &gt; 0</condition>
+  </rule>
+  
+  <rule name="SingleFileTransfer">
+    <condition>string-length(/ProcessData/ParentProcessData/SCE_Remote_Invoke/Payload/TargetFileName) &gt; 0</condition>
+  </rule>
+
+  <rule name="ChkTransferStatus">
+    <condition>/ProcessData/TransferStatus/text()=&apos;SUCCESS&apos;</condition>
+  </rule>
+  
+	<!-- Added by Mathi on 01/30/14 - Ends Here -->
+<!-- Added by Daniel on 04/01/2021 - Starts Here -->
+	<rule name="PGPUnpackRequired">
+		<condition>SCEMFTOB/PROCNAME/process_info/PGPUnPackFlag/text()=&apos;Yes&apos;</condition>
+	</rule>
+<!-- Added by Daniel on 04/01/2021 - Ends Here -->	
+
+
+  <sequence name="Sequence Start">
+    <operation name="GetDateTime">
+      <participant name="TimestampUtilService"/>
+      <output message="InpTimestampUtil">
+        <assign to="action" from="&quot;format&quot;"></assign>
+        <assign to="baseTime" from="&quot;now&quot;"></assign>
+        <assign to="format" from="&quot;yyyyMMddHHmmss&quot;"></assign>
+      </output>
+      <input message="OutTimestampUtil">
+        <assign to="/DateTimeStamp" from="/OutTimestampUtil/formattedTime/text()"></assign>
+      </input>
+    </operation>
+
+    <operation name="ReadProcessDataFromXslt">
+      <participant name="XSLTService"/>
+      <output message="XSLTServiceTypeInputMessage">
+        <assign to="xslt_name">SCE_Generic_FS_To_MB_Config</assign>
+        <assign to="xml_input_from">ProcData</assign>
+        <assign to="input_pd_xpath">/ProcessData</assign>
+        <assign to="xml_input_validation">NO</assign>
+        <assign to="." from="*"></assign>
+      </output>
+      <input message="inmsg">
+        <assign to="ReadXSLTResults" from="*"></assign>
+      </input>
+    </operation>
+
+    <operation name="loadProcDatafromxslt">
+      <participant name="XMLEncoder"/>
+      <output message="XMLEncoderTypeInputMessage">
+        <assign to="mode">xml_to_process_data</assign>
+        <assign to="output_to_process_data">YES</assign>
+        <assign to="validate_xml">NO</assign>
+        <assign to="." from="ReadXSLTResults/PrimaryDocument"></assign>
+      </output>
+      <input message="inmsg">
+        <assign to="." from="*"></assign>
+      </input>
+    </operation>
+
+    <operation name="releasexsltdoc">
+      <participant name="ReleaseService"/>
+      <output message="ReleaseServiceTypeInputMessage">
+        <assign to="TARGET">/ProcessData/ReadXSLTResults/PrimaryDocument</assign>
+        <assign to="." from="*"></assign>
+      </output>
+      <input message="inmsg">
+        <assign to="." from="*"></assign>
+      </input>
+    </operation>
+
+    <operation name="releaseotherSYSTEM">
+      <participant name="ReleaseService"/>
+      <output message="ReleaseServiceTypeInputMessage">
+        <assign to="TARGET">SCEMFTOB/PROCNAME[@name!=/ProcessData/ProcessName/text()]</assign>
+        <assign to="." from="*"></assign>
+      </output>
+      <input message="inmsg">
+        <assign to="." from="*"></assign>
+      </input>
+    </operation>
+
+		<!-- Added by Mathi on 01/30/14 - Starts Here -->    
+
+		<assign name="Assign" to="CollectionFolderName" from="/ProcessData/SCEMFTOB/PROCNAME/process_info/CollectionFolder/text()"></assign>
+		<assign name="Assign" to="CollectionFilePattern" from="/ProcessData/SCEMFTOB/PROCNAME/process_info/CollectionFileName/text()"></assign>
+		<assign name="Assign" to="TargetMailboxPath" from="/ProcessData/SCEMFTOB/PROCNAME/process_info/MailboxPath/text()"></assign>
+		
+    <choice name="IsThisBPCalledByHTTPTriggerBP">
+      <select>
+        <case ref="IsThisHTTPTrigger" activity="AssignSourceTargetInfoFromParm"/>
+      </select>
+
+      <sequence name="AssignSourceTargetInfoFromParm">
+				<assign name="Assign" to="CollectionFolderName" from="/ProcessData/ParentProcessData/SCE_Remote_Invoke/Payload/SourceFolder/text()"></assign>
+				<assign name="Assign" to="CollectionFilePattern" from="/ProcessData/ParentProcessData/SCE_Remote_Invoke/Payload/SourceFileName/text()"></assign>
+				<assign name="Assign" to="TargetMailboxPath" from="/ProcessData/ParentProcessData/SCE_Remote_Invoke/Payload/TargetFolder/text()"></assign>    
+				<assign name="Assign" to="SingleFileTargetName" from="/ProcessData/ParentProcessData/SCE_Remote_Invoke/Payload/TargetFileName/text()"></assign>    
+				
+        <operation name="set user token">
+          <participant name="SetUserToken"/>
+          <output message="SetUserTokenMessage">
+            <assign to="USER_TOKEN">admin</assign>
+            <assign to="." from="*"/>
+          </output>
+          <input message="inmsg">
+            <assign to="." from="*"/>
+          </input>
+        </operation>				
+				
+								
+			</sequence>
+
+    </choice>
+		<!-- Added by Mathi on 01/30/14 - Ends Here -->    
+		
+	
+
+    <operation name="File System Adapter">
+      <participant name="SCE_FSA"/>
+      <output message="FileSystemInputMessage">
+        <assign to="Action">FS_COLLECT</assign>
+				<!-- Added by Mathi on 01/30/14 - Starts Here -->            
+        <!--<assign to="collectionFolder" from="/ProcessData/SCEMFTOB/PROCNAME/process_info/CollectionFolder/text()"></assign>
+        <assign to="filter" from="/ProcessData/SCEMFTOB/PROCNAME/process_info/CollectionFileName/text()"></assign>-->
+        <assign to="collectionFolder" from="/ProcessData/CollectionFolderName/text()"></assign>
+        <assign to="filter" from="/ProcessData/CollectionFilePattern/text()"></assign>        
+				<!-- Added by Mathi on 01/30/14 - Ends Here -->        
+        <assign to="collectZeroByteFiles">true</assign>
+        <assign to="collectMultiple">true</assign>
+        <assign to="deleteAfterCollect">false</assign>
+		<assign to="maxCollect">1</assign>
+        <assign to="noFilesSetSuccess">true</assign>
+        <assign to="." from="*"></assign>
+      </output>
+      <input message="inmsg">
+        <assign to="." from="*"></assign>
+      </input>
+    </operation>
+
+
+    <choice name="Any Files Pickup">
+      <select>
+        <case ref="Any Files Pickups" activity="filename REP"/>
+       
+        <case ref="Any Files Pickups" negative="true" activity="ChkAndPostNACK"/>
+      </select>
+
+      <sequence name="filename REP">
+	  <operation name="ReleasePD">
+                  <participant name="ReleaseService"/>
+                  <output message="ReleaseServiceTypeInputMessage">
+                    <assign to="." from="*"></assign>
+                    <assign to="TARGET">/ProcessData/FSA_Document1 | FSA_DocumentCount</assign>
+                  </output>
+                  <input message="inmsg">
+                    <assign to="." from="*"></assign>
+                  </input>
+                </operation>
+				
+	  <assign name="Assign" to="/ProcessData/countIndex">1</assign>
+        <assign name="Assign" to="MaxFilestoProcess" from = "/ProcessData/SCEMFTOB/PROCNAME/process_info/MaxFilestoProcess/text()"></assign>
+        
+		<choice name="Multiple Files Pickup">
+          <select>
+            <case ref="Multiple Files Pickups" activity="Multiple Files Picked up"/>
+          </select>
+
+          <sequence name="Multiple Files Picked up">
+		  
+		  
+				
+				<operation name="File System Adapter">
+      <participant name="SCE_FSA"/>
+      <output message="FileSystemInputMessage">
+        <assign to="Action">FS_COLLECT</assign>
+        <assign to="collectionFolder" from="/ProcessData/CollectionFolderName/text()"></assign>
+        <assign to="filter" from="/ProcessData/CollectionFilePattern/text()"></assign>             
+        <assign to="collectZeroByteFiles">true</assign>
+        <assign to="collectMultiple">true</assign>
+        <assign to="deleteAfterCollect">false</assign>
+		<assign to="maxCollect">1</assign>
+        <assign to="noFilesSetSuccess">true</assign>
+        <assign to="." from="*"></assign>
+      </output>
+      <input message="inmsg">
+        <assign to="." from="*"></assign>
+      </input>
+    </operation>
+	
+	
+	<choice name="FileExist?">
+      <select>
+        <case ref="Any Files Pickups" activity="FileExist"/>
+       
+        <case ref="Any Files Pickups" negative="true" activity="NoFileCollected"/>
+      </select>
+	
+         <sequence name="FileExist">	
+
+            <assign name="Assign" to="PrimaryDocument" from="/ProcessData/FSA_Document1/@SCIObjectID"></assign>
+           
+            <operation name="Get Document Information Service">
+              <participant name="GetDocumentInfoService"/>
+              <output message="GetDocumentInfoServiceTypeInputMessage">
+                <assign to="." from="*"></assign>
+              </output>
+              <input message="inmsg">
+                <assign to="." from="DocumentName"></assign>
+              </input>
+            </operation>
+
+            <choice name="DecideArchive">
+              <select>
+                <case ref="ArchiveFlag" activity="doArchive"/>
+              </select>
+
+              <sequence name="doArchive">
+                <!-- Added by Mathi on 02/04/14 - Starts Here -->
+                <!--<assign name="Assign" to="ArchiveFileName" from="concat(substring-before(/ProcessData/DocumentName/text(),&apos;.&apos;),&apos;_&apos;,/ProcessData/DateTimeStamp/text(),&apos;.&apos;,substring-after(/ProcessData/DocumentName/text(),&apos;.&apos;))"></assign>-->
+                <assign name="Assign" to="ArchiveFileName" from="concat(substring-before(/ProcessData/DocumentName,&apos;.&apos;),&apos;_&apos;,/ProcessData/DateTimeStamp,&apos;.&apos;,substring-after(/ProcessData/DocumentName,&apos;.&apos;))"></assign>
+                <!-- Added by Mathi on 02/04/14 - Ends Here -->
+                <operation name="Archive">
+                  <participant name="SCE_FSA"/>
+                  <output message="FileSystemInputMessage">
+                    <assign to="." from="*"></assign>
+                    <assign to="Action">FS_EXTRACT</assign>
+                    <!-- Added by Mathi on 02/04/14 - Starts Here -->
+                    <!--<assign to="collectionFolder">.</assign>-->
+                    <!-- Added by Mathi on 02/04/14 - Ends Here -->
+                    <assign to="extractionFolder" from="SCEMFTOB/PROCNAME/process_info/ArchiveFolder/text()"></assign>
+                    <assign to="assignedFilename" from="/ProcessData/ArchiveFileName/text()"></assign>
+                  </output>
+                  <input message="inmsg">
+                    <assign to="." from="*"></assign>
+                  </input>
+                </operation>
+
+              </sequence>
+            </choice>
+
+
+	    <!-- Added by Mathi on 11/27/13 - Starts here -->
+	    
+	    <assign to="TargetFileName" from="/ProcessData/DocumentName/text()"></assign>
+
+	    <!-- Added by Mathi on 01/30/14 - Starts here -->
+	    
+	    <choice name="IsSingleFileAndFixedTargetFileName">
+	      <select>
+	        <case ref="SingleFileTransfer" activity="AssignTargetFileNameFromParmFile"/>
+	      </select>
+	
+	      <sequence name="AssignTargetFileNameFromParmFile">
+					<assign name="Assign" to="TargetFileName" from="/ProcessData/SingleFileTargetName/text()"></assign>    				
+				</sequence>
+	
+	    </choice>
+	    
+	    <choice name="DicideZippingFile">
+        <select>
+          <case ref="ZIPRequired" activity="ZipCurrentFile"/>
+        </select>
+        <sequence name="ZipCurrentFile">
+
+          <operation name="DropFileInTempFolder">
+            <participant name="SCE_FSA"/>
+            <output message="FileSystemInputMessage">
+              <assign to="." from="*"></assign>
+              <assign to="Action">FS_EXTRACT</assign>
+              <assign to="collectionFolder">.</assign>
+              <assign to="extractionFolder" from="SCEMFTOB/PROCNAME/process_info/FolderForZip/text()"></assign>
+              <assign to="assignedFilename" from="/ProcessData/TargetFileName/text()"></assign>
+            </output>
+            <input message="inmsg">
+              <assign to="." from="*"></assign>
+            </input>
+          </operation>
+
+	        <operation name="ReleaseSourcePD">
+	          <participant name="ReleaseService"/>
+	          <output message="ReleaseServiceTypeInputMessage">
+	            <assign to="." from="*"></assign>
+	            <assign to="TARGET">PrimaryDocument</assign>
+	          </output>
+	          <input message="inmsg">
+	            <assign to="." from="*"></assign>
+	          </input>
+	        </operation>
+
+	    		<assign to="CurrentFileExtn" from="substring-after(substring(/ProcessData/DocumentName/text(),string-length(/ProcessData/DocumentName/text()) -5),'.')"></assign>
+	    		<assign to="ZipFileName" from="concat(substring-before(/ProcessData/DocumentName/text(), /ProcessData/CurrentFileExtn/text()), &apos;zip&apos;)"></assign>
+
+					<operation name="ZipTheFile">
+						<participant name="SCE_CmdLineAdapter2"/>
+							<output message="CmdLine2InputMessage">
+								<assign to="." from="*"></assign>
+								<assign to="workingDir" from="SCEMFTOB/PROCNAME/process_info/FolderForZip/text()"></assign>
+								<assign to="cmdLine" from="concat (&apos;zip &quot;&apos;, /ProcessData/ZipFileName, &apos;&quot; &quot;&apos;, /ProcessData/DocumentName, &apos;&quot;&apos;)"></assign>
+								<assign to="setSoTimeout">6000000</assign>
+								<assign to="useOutput">true</assign>
+							</output>
+							<input message="inmsg">
+								<assign to="." from="*"></assign>
+							</input>
+					</operation>
+
+          <operation name="DeleteTempSourceFile">
+            <participant name="SCE_CmdLineAdapter2"/>
+            <output message="CmdLine2InputMessage">
+              <assign to="." from="*"></assign>
+              <assign to="cmdLine" from="concat (&apos;rm -r &quot;&apos;, /ProcessData/DocumentName, &apos;&quot;&apos;)"></assign>
+              <assign to="setSoTimeout">6000000</assign>
+          		<assign to="useOutput">true</assign>
+              <assign to="workingDir" from="SCEMFTOB/PROCNAME/process_info/FolderForZip/text()"></assign>
+            </output>
+            <input message="inmsg">
+              <assign to="." from="*"></assign>
+            </input>
+          </operation>
+
+			    <operation name="Pickup Zipped File">
+			      <participant name="SCE_FSA"/>
+			      <output message="FileSystemInputMessage">
+			        <assign to="Action">FS_COLLECT</assign>
+			        <assign to="collectionFolder" from="SCEMFTOB/PROCNAME/process_info/FolderForZip/text()"></assign>
+			        <assign to="filter" from="/ProcessData/ZipFileName/text()"></assign>
+			        <assign to="collectMultiple">false</assign>
+			        <assign to="deleteAfterCollect">true</assign>
+			        <assign to="noFilesSetSuccess">true</assign>
+			        <assign to="." from="*"></assign>
+			      </output>
+			      <input message="inmsg">
+			        <assign to="." from="*"></assign>
+			      </input>
+			    </operation>
+
+					<assign to="TargetFileName" from="/ProcessData/ZipFileName/text()"></assign>
+        	
+        </sequence>
+      </choice>
+
+	    <!-- Added by Mathi on 01/30/14 - Ends here -->
+
+		<!-- Added by Daniel on 04/01/2021 - Starts here -->
+			<choice name="PGPUnpackRequired">
+      <select>
+        <case ref="PGPUnpackRequired" activity="PGPUnpackBegin"/>
+      </select>
+
+      <sequence name="PGPUnpackBegin">
+        <operation name="PGP Unpackage Service">
+          <participant name="SCE_PGPUnpackageService"/>
+          <output message="PGPUnpackageServiceTypeInputMessage">
+            <assign to="." from="*"></assign>
+            <assign to="setSoTimeout">600000</assign>
+            <assign to="profile_name">SCE_PGP</assign>
+            <assign to="cmdline2svcname">SCE_PGPCmdlineService</assign>
+            <assign to="secret_keymap_name" from="SCEMFTOB/PROCNAME/process_info/KeyMapName/text()"></assign>
+          </output>
+          <input message="inmsg">
+            <assign to="." from="*"></assign>
+          </input>
+        </operation>
+
+        <operation name="Release Service">
+          <participant name="ReleaseService"/>
+          <output message="ReleaseServiceTypeInputMessage">
+            <assign to="." from="*"></assign>
+            <assign to="TARGET">PrimaryDocument</assign>
+          </output>
+          <input message="inmsg">
+            <assign to="." from="*"></assign>
+          </input>
+        </operation>
+
+        <assign name="Assign" to="PrimaryDocument" from="/ProcessData/PGP/Document/@SCIObjectID"></assign>
+        <operation name="ReleasePGPDoc">
+          <participant name="ReleaseService"/>
+          <output message="ReleaseServiceTypeInputMessage">
+            <assign to="." from="*"></assign>
+            <assign to="TARGET">PGP</assign>
+          </output>
+          <input message="inmsg">
+            <assign to="." from="*"></assign>
+          </input>
+        </operation>
+
+        <operation name="ReleaseCLA2Doc">
+          <participant name="ReleaseService"/>
+          <output message="ReleaseServiceTypeInputMessage">
+            <assign to="." from="*"></assign>
+            <assign to="TARGET">CLA2</assign>
+          </output>
+          <input message="inmsg">
+            <assign to="." from="*"></assign>
+          </input>
+        </operation>
+		<assign to="TargetFileName" from="substring-before(/ProcessData/TargetFileName/text(), SCEMFTOB/PROCNAME/process_info/PGPUnPackFileExtn/text())"></assign>
+      </sequence>
+    </choice>
+<!-- Added by Daniel on 04/01/2021 - Ends here -->
+
+	    <choice name="DicidePGPPack">
+              <select>
+                <case ref="PGPRequired" activity="PGPBegin"/>
+              </select>
+
+              <sequence name="PGPBegin">
+                <operation name="PGP">
+                  <participant name="PGPPackageService"/>
+                  <output message="PGPPackageServiceTypeInputMessage">
+                    <assign to="setSoTimeout">600000</assign>
+                    <assign to="ascii_armor">off</assign>
+                    <assign to="public_user" from="SCEMFTOB/PROCNAME/process_info/public_user/text()"></assign>
+                    <assign to="compress">off</assign>
+                    <assign to="profile_name">SCE_PGP</assign>
+                    <assign to="cmdline2svcname">SCE_PGPCmdlineService</assign>
+                    <assign to="." from="*"></assign>
+                  </output>
+                  <input message="inmsg">
+                    <assign to="." from="*"></assign>
+                    <assign to="PGPResults" from="*"></assign>
+                  </input>
+                </operation>
+
+                <operation name="ReleasePD">
+                  <participant name="ReleaseService"/>
+                  <output message="ReleaseServiceTypeInputMessage">
+                    <assign to="." from="*"></assign>
+                    <assign to="TARGET">PrimaryDocument</assign>
+                  </output>
+                  <input message="inmsg">
+                    <assign to="." from="*"></assign>
+                  </input>
+                </operation>
+
+                <assign name="Assign" to="PrimaryDocument" from="/ProcessData/PGP/Document/@SCIObjectID"></assign>
+                <operation name="ReleasePGPDoc">
+                  <participant name="ReleaseService"/>
+                  <output message="ReleaseServiceTypeInputMessage">
+                    <assign to="." from="*"></assign>
+                    <assign to="TARGET">PGP</assign>
+                  </output>
+                  <input message="inmsg">
+                    <assign to="." from="*"></assign>
+                  </input>
+                </operation>
+
+                <operation name="ReleaseCLA2Doc">
+                  <participant name="ReleaseService"/>
+                  <output message="ReleaseServiceTypeInputMessage">
+                    <assign to="." from="*"></assign>
+                    <assign to="TARGET">CLA2</assign>
+                  </output>
+                  <input message="inmsg">
+                    <assign to="." from="*"></assign>
+                  </input>
+                </operation>
+
+								<assign to="TargetFileName" from="concat(/ProcessData/TargetFileName/text(), SCEMFTOB/PROCNAME/process_info/PGPFileExtn/text())"></assign>
+
+              </sequence>
+            </choice>
+
+	    			<!-- Added by Mathi on 11/27/13 - Ends here -->
+
+
+            <operation name="Mailbox Add Service">
+              <participant name="MailboxAdd"/>
+              <output message="AddRequest">
+                <assign to="." from="*"></assign>
+
+								<!-- Added by Mathi on 11/27/13 - Starts here -->
+                <assign to="MessageName" from="/ProcessData/TargetFileName/text()"></assign>
+								<!-- Added by Mathi on 11/27/13 - Ends here -->
+								<!-- Added by Mathi on 01/30/14 - Starts Here -->
+                <!--<assign to="MailboxPath" from="/ProcessData/SCEMFTOB/PROCNAME/process_info/MailboxPath/text()"></assign>-->
+                <assign to="MailboxPath" from="/ProcessData/TargetMailboxPath/text()"></assign>                
+                <!-- Added by Mathi on 01/30/14 - Ends Here -->
+              </output>
+              <input message="inmsg">
+                <assign to="AddResults" from="*"></assign>
+              </input>
+            </operation>
+
+        <!-- Added by Mathi on 11/14/13 - Starts here -->
+				<choice name="SourceFileDeleteCheck">
+          <select>
+            <case ref="DeleteFileFromSource" negative="true" activity="DeleteSourceFileFromFolder"/>
+          </select>
+
+          <sequence name="DeleteSourceFileFromFolder">
+        <!-- Added by Mathi on 11/14/13 - Ends here -->
+
+            <operation name="Command Line 2 Adapter">
+              <participant name="SCE_CmdLineAdapter2"/>
+              <output message="CmdLine2InputMessage">
+                <assign to="." from="*"></assign>
+                <!-- Added by Mathi on 01/30/14 - Starts Here -->
+                <!--<assign to="workingDir" from="/ProcessData/SCEMFTOB/PROCNAME/process_info/CollectionFolder/text()"></assign>-->
+                <assign to="workingDir" from="/ProcessData/CollectionFolderName/text()"></assign>
+                <!-- Added by Mathi on 01/30/14 - Ends Here -->
+                <assign to="cmdLine" from="concat (&apos;rm -r &quot;&apos;, /ProcessData/DocumentName/text(), &apos;&quot;&apos;)"></assign>
+              </output>
+              <input message="inmsg">
+                <assign to="." from="*"></assign>
+              </input>
+            </operation>
+
+        <!-- Added by Mathi on 11/14/13 - Starts here -->
+          </sequence>
+        </choice>
+        <!-- Added by Mathi on 11/14/13 - Ends here -->
+
+	    <assign to="MailBoxFile" from="/ProcessData/TargetFileName/text()"></assign>
+            <assign name="Assign" to="//countIndex" from="//countIndex +1"></assign>
+
+            <operation name="Release PD Tags">
+              <participant name="ReleaseService"/>
+              <output message="ReleaseServiceTypeInputMessage">
+                <assign to="TARGET">PrimaryDocument | ArchiveFileName</assign>
+                <assign to="." from="*"></assign>
+              </output>
+              <input message="inmsg">
+                <assign to="." from="*"></assign>
+              </input>
+            </operation>
+
+        <!-- Added by Mathi on 10/05/12 - Starts here -->
+				<choice name="CheckEndPoint">
+          <select>
+            <case ref="EndPointCheck" negative="true" activity="DelayBetweenFiles"/>
+          </select>
+
+          <sequence name="DelayBetweenFiles">
+        <!-- Added by Mathi on 10/05/12 - Ends here -->
+            <operation name="delayNextFile">
+              <participant name="SleepService"/>
+              <output message="SleepServiceInputMessage">
+                <assign to="MSEC_SLEEP_INTERVAL">10000</assign>
+                <assign to="." from="*"></assign>
+              </output>
+              <input message="inmsg">
+                <assign to="." from="*"></assign>
+              </input>
+            </operation>
+
+        <!-- Added by Mathi on 10/05/12 - Starts here -->
+          </sequence>
+        </choice>
+        <!-- Added by Mathi on 10/05/12 - Ends here -->
+
+            <choice name="SendEmail">
+              <select>
+                <case ref="Send Email" activity="Send Success Email"/>
+              </select>
+
+              <sequence name="Send Success Email">
+                <operation name="readEmailBodyxsltdoc">
+                  <participant name="XSLTService"/>
+                  <output message="XSLTServiceTypeInputMessage">
+                    <assign to="xslt_name">SCE_Generic_Outbound_Email_Body_NoArch</assign>
+                    <assign to="xml_input_from">ProcData</assign>
+                    <assign to="input_pd_xpath">/ProcessData</assign>
+                    <assign to="xml_input_validation">NO</assign>
+                    <assign to="." from="*"></assign>
+                  </output>
+                  <input message="inmsg">
+                    <assign to="ReadXSLTResults" from="*"></assign>
+                  </input>
+                </operation>
+
+                <assign name="Assign" to="PrimaryDocument" from="/ProcessData/ReadXSLTResults/PrimaryDocument/@SCIObjectID"></assign>
+                <assign name="Assign" to="mailhost">smtp.sce.com</assign>
+                <operation name="Mail Mime Service">
+                  <participant name="MailMimeService"/>
+                  <output message="MailMimeServiceInputMessage">
+                    <assign to="mail-mime-subject" from="/ProcessData/SCEMFTOB/PROCNAME/mail_info/mail-mime-subject/text()"></assign>
+                    <assign to="mail-mime-sender" from="/ProcessData/SCEMFTOB/PROCNAME/mail_info/mail-mime-sender/text()"></assign>
+                    <assign to="mail-mime-operation">build</assign>
+                    <assign to="mail-mime-use-doc-area">false</assign>
+                    <assign to="mail-mime-subject-encoding">UTF-8</assign>
+                    <assign to="mail-mime-recipient" from="/ProcessData/SCEMFTOB/PROCNAME/mail_info/mail-mime-recipient/text()"></assign>
+                    <assign to="mail-mime-body">true</assign>
+                    <assign to="." from="*"></assign>
+                  </output>
+                  <input message="inmsg">
+                    <assign to="." from="*"></assign>
+                  </input>
+                </operation>
+
+                <operation name="SMTP Send Email">
+                  <participant name="SMTP_SEND_ADAPTER"/>
+                  <output message="Xout">
+                    <assign to="." from="*"></assign>
+                    <!-- Added by Mathi on 02/04/14 - Starts Here -->
+                    <!--<assign to="xport-smtp-mailfrom">scemftsys@sce.com</assign>
+                    <assign to="xport-smtp-mailhost" from="//mailhost/text()"></assign>-->
+                    <assign to="xport-smtp-mailfrom" from="/ProcessData/SCEMFTOB/PROCNAME/mail_info/mail-mime-sender/text()"></assign>
+                    <assign to="xport-smtp-mailhost" from="/ProcessData/mailhost/text()"></assign>
+                    <!-- Added by Mathi on 02/04/14 - Ends Here -->
+                    <assign to="b2b-raw-message">true</assign>
+                    <assign to="xport-smtp-mailport">25</assign>
+                    <assign to="xport-b2b-mode">off</assign>
+                  </output>
+                  <input message="Xin">
+                    <assign to="." from="*"></assign>
+                  </input>
+                </operation>
+
+                <operation name="ReleaseEMailBody">
+                  <participant name="ReleaseService"/>
+                  <output message="ReleaseServiceTypeInputMessage">
+                    <assign to="TARGET">ReadXSLTResults</assign>
+                    <assign to="." from="*"></assign>
+                  </output>
+                  <input message="inmsg">
+                    <assign to="." from="*"></assign>
+                  </input>
+                </operation>
+
+                <operation name="ReleasePD">
+                  <participant name="ReleaseService"/>
+                  <output message="ReleaseServiceTypeInputMessage">
+                    <assign to="TARGET">PrimaryDocument</assign>
+                    <assign to="." from="*"></assign>
+                  </output>
+                  <input message="inmsg">
+                    <assign to="." from="*"></assign>
+                  </input>
+                </operation>
+
+              </sequence>
+            </choice>
+            <operation name="ReleasePD">
+              <participant name="ReleaseService"/>
+              <output message="ReleaseServiceTypeInputMessage">
+              	<!-- Added by Mathi on 01/30/14 - Starts here -->
+                <assign to="TARGET">DocumentName | TargetFileName | MailBoxFile | CurrentFileExtn | ZipFileName | cmdLine | FileName | inputName | useInput | inputDelete | useOutput | outputName | outputDelete | cla2_debug | createUniqueDirForEachFile | env0 | setSoTimeout | AddResults | CLA2</assign>
+                <!--<assign to="TARGET">DocumentName | TargetFileName | MailBoxFile</assign>-->
+                <!-- Added by Mathi on 01/30/14 - Ends here -->
+                <assign to="." from="*"></assign>
+              </output>
+              <input message="inmsg">
+                <assign to="." from="*"></assign>
+              </input>
+            </operation>
+
+						<!-- Added by Mathi on 01/30/14 - Starts Here -->
+						<assign to="TransferStatus">SUCCESS</assign>
+						<!-- Added by Mathi on 01/30/14 - Ends Here -->
+						
+						<operation name="ReleasePD">
+                  <participant name="ReleaseService"/>
+                  <output message="ReleaseServiceTypeInputMessage">
+                    <assign to="." from="*"></assign>
+                    <assign to="TARGET">/ProcessData/FSA_Document1 | FSA_DocumentCount</assign>
+                  </output>
+                  <input message="inmsg">
+                    <assign to="." from="*"></assign>
+                  </input>
+                </operation>
+				
+				<repeat name="Repeat" ref="Multiple Files Pickup"/>
+				
+			</sequence>  <!-- for file exist condition -->
+			
+			<sequence name="NoFileCollected">
+			
+				<assign name="Assign" to="//countIndex" from="// MaxFilestoProcess +1"></assign>
+			</sequence>
+			</choice>
+
+			
+          </sequence>
+        </choice>
+      </sequence>
+      
+			<!-- Added by Mathi on 01/30/14 - Starts Here -->
+			<sequence name="ChkAndPostNACK">
+		    <choice name="IsThisHTTPTriggeredBP">
+		      <select>
+		        <case ref="IsThisHTTPTrigger" activity="PostNegativeACKToSAP"/>
+		      </select>
+		
+		      <sequence name="PostNegativeACKToSAP">
+				    <operation name="Assign">
+				    	<participant name="AssignService"/>
+				      <output message="out_message">
+				        <assign to="." from="*"></assign>
+				        <assign to="message_to_child/ParentProcessData" from="/ProcessData/ParentProcessData/*"></assign>
+				        <assign to="message_to_child/ACKStatus">Failure</assign>
+				        <assign to="message_to_child/ReturnCode">1</assign>
+				        <assign to="message_to_child/ReturnDescription">No Files Found in Source Folder</assign>
+				      </output>
+				      <input message="inmsg">
+				        <assign to="." from="*"></assign>
+				      </input>
+				    </operation>
+				
+				    <operation name="CallTheBP">
+				      <participant name="InvokeBusinessProcessService"/>
+				      <output message="InvokeBusinessProcessServiceTypeInputMessage">
+				        <assign to="." from="*"></assign>
+				        <assign to="INVOKE_MODE">ASYNC</assign>
+								<assign to="WFD_NAME" from="/ProcessData/SCEMFTOB/PROCNAME/process_info/TriggerProcessName/text()"></assign>
+				      </output>
+				      <input message="inmsg">
+				        <assign to="." from="*"></assign>
+				      </input>
+				    </operation>
+				
+				    <operation name="Release PD Tags">
+							<participant name="ReleaseService"/>
+				      <output message="ReleaseServiceTypeInputMessage">
+								<assign to="TARGET">message_to_child</assign>
+								<assign to="." from="*"></assign>
+				      </output>
+							<input message="inmsg">
+								<assign to="." from="*"></assign>
+							</input>
+				    </operation>
+				    
+				    <assign to="TransferStatus">FAILURE</assign>
+				    
+					</sequence>										
+				</choice>				
+			</sequence>
+			<!-- Added by Mathi on 01/30/14 - Ends Here -->
+      
+    </choice>
+    
+		<!-- Added by Mathi on 01/30/14 - Starts Here -->    
+    <choice name="TriggerAnyBP?">
+      <select>
+        <case ref="InvokeBPAtEnd" activity="PrepareParmsAndTriggerBP"/>
+      </select>
+
+      <sequence name="PrepareParmsAndTriggerBP">
+    
+		    <choice name="IsThisSAPHTTPAckPost">
+		      <select>
+		        <case ref="IsThisHTTPTrigger" activity="PreparePayLoadInfo"/>
+		      </select>
+		
+		      <sequence name="PreparePayLoadInfo">
+
+				    <operation name="Assign">
+				    	<participant name="AssignService"/>
+				      <output message="out_message">
+				        <assign to="." from="*"></assign>
+				        <assign to="message_to_child/ParentProcessData" from="/ProcessData/ParentProcessData/*"></assign>
+				        <assign to="message_to_child/ACKStatus">Success</assign>
+				        <assign to="message_to_child/ReturnCode">0</assign>
+				        <assign to="message_to_child/ReturnDescription">MFT Process Completed Successfully</assign>
+				      </output>
+				      <input message="inmsg">
+				        <assign to="." from="*"></assign>
+				      </input>
+				    </operation>
+
+					</sequence>
+				</choice>
+
+		    <choice name="IsTransferSuccess">
+		      <select>
+		        <case ref="ChkTransferStatus" activity="TriggerNextBP"/>
+		      </select>
+		
+		      <sequence name="TriggerNextBP">
+
+				    <operation name="CallTheBP">
+				      <participant name="InvokeBusinessProcessService"/>
+				      <output message="InvokeBusinessProcessServiceTypeInputMessage">
+				        <assign to="." from="*"></assign>
+				        <assign to="INVOKE_MODE">ASYNC</assign>
+								<assign to="WFD_NAME" from="/ProcessData/SCEMFTOB/PROCNAME/process_info/TriggerProcessName/text()"></assign>
+				      </output>
+				      <input message="inmsg">
+				        <assign to="." from="*"></assign>
+				      </input>
+				    </operation>
+				  </sequence>
+				</choice>
+		
+		    <operation name="Release PD Tags">
+					<participant name="ReleaseService"/>
+		      <output message="ReleaseServiceTypeInputMessage">
+						<assign to="TARGET">message_to_child</assign>
+						<assign to="." from="*"></assign>
+		      </output>
+					<input message="inmsg">
+						<assign to="." from="*"></assign>
+					</input>
+		    </operation>
+			</sequence>
+
+    </choice>
+		<!-- Added by Mathi on 01/30/14 - Ends Here -->    
+    
+    <onFault>
+      <sequence name="Sequence Start">
+      	
+				<!-- Added by Mathi on 01/30/14 - Starts Here -->    
+		    <choice name="HTTPTriggerInvoke?">
+		      <select>
+		        <case ref="IsThisHTTPTrigger" activity="PrepareFailureParmsAndTriggerBP"/>
+		      </select>
+		
+		      <sequence name="PrepareFailureParmsAndTriggerBP">
+		    
+		    
+				    <operation name="Assign">
+				    	<participant name="AssignService"/>
+				      <output message="out_message">
+				        <assign to="." from="*"></assign>
+				        <assign to="message_to_child/ParentProcessData" from="/ProcessData/ParentProcessData/*"></assign>
+				        <assign to="message_to_child/ACKStatus">Failure</assign>
+				        <assign to="message_to_child/ReturnCode">1</assign>
+				        <assign to="message_to_child/ReturnDescription" from="/ProcessData/Prev_NotSuccess_Adv_Status/text()"></assign>
+				      </output>
+				      <input message="inmsg">
+				        <assign to="." from="*"></assign>
+				      </input>
+				    </operation>
+				
+				    <operation name="CallTheBP">
+				      <participant name="InvokeBusinessProcessService"/>
+				      <output message="InvokeBusinessProcessServiceTypeInputMessage">
+				        <assign to="." from="*"></assign>
+				        <assign to="INVOKE_MODE">ASYNC</assign>
+								<assign to="WFD_NAME" from="/ProcessData/SCEMFTOB/PROCNAME/process_info/TriggerProcessName/text()"></assign>
+				      </output>
+				      <input message="inmsg">
+				        <assign to="." from="*"></assign>
+				      </input>
+				    </operation>
+				
+				    <operation name="Release PD Tags">
+							<participant name="ReleaseService"/>
+				      <output message="ReleaseServiceTypeInputMessage">
+								<assign to="TARGET">message_to_child</assign>
+								<assign to="." from="*"></assign>
+				      </output>
+							<input message="inmsg">
+								<assign to="." from="*"></assign>
+							</input>
+				    </operation>
+					</sequence>
+		
+		    </choice>
+				<!-- Added by Mathi on 01/30/14 - Ends Here -->      	
+      	
+      	
+        <spawn name="Spawn" ref="SCE_Generic_EMailOnError"/>
+
+      </sequence>
+    </onFault>
+  </sequence>
+</process>
+  

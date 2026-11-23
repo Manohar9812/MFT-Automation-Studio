@@ -1,0 +1,20 @@
+<ROUTERULE name="-7f43dffc:12df5ccfe8e:c63">
+		<FromMailBox>/EDIStagingOutbound/OB_814_4010_ESP_DASR</FromMailBox>
+		<archive_info>
+		  <ArchiveFlag>No</ArchiveFlag>
+		  <ArchiveFolder></ArchiveFolder>
+		</archive_info>
+		<orgDir_info>
+		  <FileNameAddition></FileNameAddition>
+		  <FileNameExtn></FileNameExtn>
+		</orgDir_info>
+		<destination_info>
+			<NewFileName><xsl:value-of select="/ProcessData/Variables/Message/MessageName"/></NewFileName>
+			<ToMailBox2>/Voltenergy/Outbound</ToMailBox2>
+			<ExtractableCount2>1</ExtractableCount2>
+		</destination_info>
+		<mail_info>
+			<MailFlag>No</MailFlag>
+		</mail_info>
+		<DeleteMessage>Yes</DeleteMessage>
+	</ROUTERULE>                       

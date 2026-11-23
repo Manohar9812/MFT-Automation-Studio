@@ -118,6 +118,23 @@
     });
     return order;
   }
+
+  // Human-readable label for an XSLT/envelope token. Strips the EDI block
+  // prefix (rr_/sg_/sp_/ib_/ob_/fm_/pp_/pi_/em_/dm_/ex_), looks it up in the
+  // friendly LABELS map, then falls back to a prettified token.
+  var _PREFIX = /^(rr|sg|sp|ib|ob|fm|pp|pi|em|dm|ex)_/;
+  function prettify(key) {
+    var k = String(key || '').replace(_PREFIX, '');
+    k = k.replace(/[_-]+/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2').trim();
+    return k ? k.charAt(0).toUpperCase() + k.slice(1) : key;
+  }
+  function labelFor(key) {
+    var labels = B.LABELS || {};
+    if (labels[key]) return labels[key];
+    var base = String(key || '').replace(_PREFIX, '');
+    if (labels[base]) return labels[base];
+    return prettify(key);
+  }
   function fieldKeys(iface) {
     var t = T(iface), seen = {}, order = [];
     var keepReserved = xsltOnly(iface);
@@ -174,7 +191,7 @@
         suffix: '/post/station_ecmwf', staticPath: '', custom: '',
         appendCycle: true
       },
-      x: x, out: null
+      x: x, out: null, env: {}
     };
   }
   function fmtDate(d) {
@@ -413,7 +430,7 @@
 
   // Highlight the active sidebar item and set the page title/subtitle.
   function setActive(navId, title, sub) {
-    ['nav-home', 'nav-templates', 'nav-import', 'nav-analysis', 'nav-selftest', 'nav-accounts']
+    ['nav-home', 'nav-templates', 'nav-import', 'nav-analysis', 'nav-selftest', 'nav-accounts', 'nav-ai']
       .forEach(function (id) {
         var e = document.getElementById(id);
         if (e) e.classList.toggle('active', id === navId);
@@ -451,8 +468,11 @@
   // ------------------------------------------------------------- home view
   function renderHome() {
     setActive('nav-home', 'Integrations', 'Choose an interface and generate Sterling Integrator artefacts.');
-    var cards = Object.keys(B.IFACES).map(function (id) {
+
+    // Build one card per interface.
+    function ifaceCard(id) {
       var i = B.IFACES[id], ok = ready(id);
+      var stepCount = (i.steps || []).filter(function (s) { return s !== 'Review'; }).length;
       return el('div', { class: 'card iface' + (ok ? '' : ' disabled') }, [
         el('div', { class: 'ifhead' }, [
           el('h3', { text: i.title }),
@@ -460,22 +480,43 @@
         ]),
         el('p', { class: 'muted', text: i.desc }),
         el('div', { class: 'row' }, [
+          el('span', { class: 'muted small', text: stepCount + (stepCount === 1 ? ' step' : ' steps') }),
+          el('span', { class: 'spacer' }),
           el('button', {
             class: 'btn primary', disabled: ok ? null : 'disabled',
             onclick: function () { A.start(id); }
           }, ['New business process'])
         ])
       ]);
+    }
+
+    // Group interfaces by category, preserving definition order.
+    var order = [], groups = {};
+    Object.keys(B.IFACES).forEach(function (id) {
+      var cat = B.IFACES[id].category || 'Other';
+      if (!groups[cat]) { groups[cat] = []; order.push(cat); }
+      groups[cat].push(id);
     });
+
+    var sections = order.map(function (cat) {
+      var ids = groups[cat];
+      var readyCount = ids.filter(function (id) { return ready(id); }).length;
+      return el('div', { class: 'stack' }, [
+        el('div', { class: 'cat-head' }, [
+          el('h3', { text: cat }),
+          el('span', { class: 'muted small', text: readyCount + ' / ' + ids.length + ' ready' })
+        ]),
+        el('div', { class: 'grid' }, ids.map(ifaceCard))
+      ]);
+    });
+
     var v = view(); v.innerHTML = '';
     v.appendChild(el('div', { class: 'stack' }, [
       el('div', { class: 'hero' }, [
         el('h2', { text: 'Choose an interface' }),
         el('p', { class: 'muted', text: 'Generate the BPML, SI import XML and XSLT block from a short form.' })
-      ]),
-      el('div', { class: 'grid' }, cards),
-      renderHistory()
-    ]));
+      ])
+    ].concat(sections).concat([renderHistory()])));
   }
 
   function renderHistory() {
@@ -656,7 +697,7 @@
           var node = (B.YN.indexOf(k) >= 0)
             ? toggle(S.x[k], function (v) { S.x[k] = v; saveState(); })
             : input(S.x[k], function (v) { S.x[k] = v; saveState(); });
-          return field(k, node, B.HINT[k]);
+          return field(labelFor(k), node, B.HINT[k]);
         }))
       ])
     ]);
@@ -683,6 +724,94 @@
       ]);
     });
     return el('div', { class: 'stack' }, sections);
+  }
+
+  // =====================================================================
+  // EDI TRADING-PARTNER ENVELOPES (ISA / GS / ST segments)
+  // =====================================================================
+  var ENV = window.__EDI_ENV__;
+
+  // True when the current interface has a mapped envelope export XML.
+  function hasEnvelopes(iface) { return !!(ENV && ENV.has(iface)); }
+  // Pretty labels for the top-level identity fields.
+  var ENV_LABELS = {
+    NAME: 'Envelope name', SENDER_ID: 'Sender ID', RECEIVER_ID: 'Receiver ID',
+    CONTROL_NUMBER: 'Control number'
+  };
+
+  // Build the generated (developer-filled) envelope XML, or null if the source
+  // XML has not been loaded yet.
+  function envOutput() {
+    if (!hasEnvelopes(S.iface) || !ENV._cache || !ENV._cache[S.iface]) return null;
+    var src = ENV._cache[S.iface];
+    if (!src || src.error) return null;
+    return ENV.generate(src.xml, S.env || {});
+  }
+  function envFileName(name) {
+    return (name || 'package') + '_Envelopes.xml';
+  }
+
+  function stepEnvelopes() {
+    var host = el('div', { class: 'stack' });
+    if (!ENV._cache) ENV._cache = {};
+    // Trigger the (cached) load; re-render once resolved.
+    if (!ENV._cache[S.iface]) {
+      host.appendChild(el('div', { class: 'al g', text: 'Loading trading-partner envelopes\u2026' }));
+      ENV.fetchFor(S.iface).then(function (data) {
+        ENV._cache[S.iface] = data;
+        if (SK()[S.step] === 'Envelopes') renderWizard();
+      }, function (err) {
+        ENV._cache[S.iface] = { error: String((err && err.message) || err) };
+        if (SK()[S.step] === 'Envelopes') renderWizard();
+      });
+      return host;
+    }
+    var data = ENV._cache[S.iface];
+    if (data.error) {
+      host.appendChild(el('div', { class: 'al e', text: 'Could not load envelopes: ' + data.error }));
+      return host;
+    }
+
+    host.appendChild(el('div', { class: 'al g', text:
+      'Read ' + data.envelopes.length + ' TP envelope segment(s) from ' + data.url +
+      '. Fill in the values for your trading partner below.' }));
+
+    S.env = S.env || {};
+    data.envelopes.forEach(function (env) {
+      S.env[env.index] = S.env[env.index] || {};
+      var ov = S.env[env.index];
+
+      var coreRows = ENV.CORE.map(function (c) {
+        var cur = (ov[c] != null) ? ov[c] : env.core[c];
+        return field(ENV_LABELS[c] || c,
+          input(cur, function (v) { ov[c] = v; saveState(); }),
+          (c === 'SENDER_ID' || c === 'RECEIVER_ID') ? 'Trading-partner X12 identifier.' : '');
+      });
+
+      var parmRows = env.parmKeys.map(function (p) {
+        var cur = (ov[p] != null) ? ov[p] : env.parms[p];
+        var node = (ENV.YN.indexOf(p) >= 0)
+          ? toggle(cur === 'YES' ? 'Yes' : 'No',
+              function (v) { ov[p] = (v === 'Yes' ? 'YES' : 'NO'); saveState(); })
+          : input(cur, function (v) { ov[p] = v; saveState(); });
+        return field(labelFor(p), node);
+      });
+
+      host.appendChild(el('div', { class: 'card' }, [
+        el('h3', { text: env.segment + ' \u00b7 ' + (env.name || env.type) }),
+        el('div', { class: 'muted small', text: 'Segment ' + env.type + ' \u2022 standard ' + (env.standard || 'X12') }),
+        el('div', { class: 'formgrid' }, coreRows),
+        parmRows.length ? el('h3', { text: 'Envelope parameters' }) : null,
+        parmRows.length ? el('div', { class: 'formgrid' }, parmRows) : null
+      ].filter(Boolean)));
+    });
+
+    var out = envOutput();
+    host.appendChild(el('details', { class: 'adv' }, [
+      el('summary', { text: 'Preview generated envelope XML' }),
+      el('pre', { class: 'code' }, [el('code', { text: out || '' })])
+    ]));
+    return host;
   }
 
   function stepReview() {
@@ -713,6 +842,12 @@
       name: 'Mailbox paths',
       content: builds.map(function (x) { return x.name + ': ' + x.mailbox; }).join('\n'),
       file: b.name + '_mailboxes.txt'
+    });
+    var envXml = envOutput();
+    if (envXml) items.push({
+      name: 'TP Envelopes',
+      content: envXml,
+      file: envFileName(b.name)
     });
 
     S._rt = Math.min(S._rt || 0, items.length - 1);
@@ -745,6 +880,7 @@
     if (stepName === 'Details') body = stepDetails();
     else if (stepName === 'Dynamic mailbox') body = stepDynamic();
     else if (stepName === 'XSLT fields') body = stepXslt();
+    else if (stepName === 'Envelopes') body = stepEnvelopes();
     else if (stepName === 'Review') body = stepReview();
     else {
       var blk = blockByLabel(S.iface, stepName);
@@ -870,6 +1006,133 @@
     import: function () { renderImport(); },
     analysis: function () { renderAnalysis(); },
     accounts: function () { renderAccounts(); },
+    ai: function () { renderAI(); },
+    // Section-by-section introspection for the AI chat (mirrors the wizard).
+    introspect: function (ifaceId) {
+      var def = B.IFACES[ifaceId];
+      if (!def) return null;
+      var t = T(ifaceId);
+      function mapKeys(keys) {
+        return keys.map(function (k) {
+          return { key: k, label: labelFor(k), hint: B.HINT[k] || '', yn: (B.YN.indexOf(k) >= 0) };
+        });
+      }
+      var sections = [];
+      if (!xsltOnly(ifaceId)) {
+        sections.push({
+          id: 'bp', title: 'Business Process',
+          intro: 'First we set up the Business Process.',
+          fields: [
+            { key: '__bpname__', label: 'Business Process name', hint: 'e.g. SCE_OB_850_SUPL_PO', yn: false },
+            { key: '__description__', label: 'Description', hint: 'Short purpose of this BP', yn: false }
+          ]
+        });
+      } else if ('ProcessName' in (newState(ifaceId).x)) {
+        sections.push({
+          id: 'bp', title: 'Process',
+          intro: 'First the process name.',
+          fields: [{ key: '__processname__', label: 'Process name', hint: '', yn: false }]
+        });
+      }
+      xsltBlocks(ifaceId).forEach(function (b) {
+        var keys = blockFieldKeys(b.tpl).filter(function (k) {
+          return B.RESERVED.indexOf(k) < 0;
+        });
+        if (!keys.length) return;
+        sections.push({
+          id: b.key, title: b.label,
+          intro: 'Configures the ' + b.label + ' block (' + b.file.replace(/^_/, '') + ').',
+          fields: mapKeys(keys)
+        });
+      });
+      return {
+        id: ifaceId, title: def.title,
+        category: def.category || '', sections: sections
+      };
+    },
+    // Build the trading-partner ENVELOPE sections for the AI chat, reading the
+    // ISA/GS/ST segments straight from the interface's envelope export XML.
+    // Returns a Promise of [{id,title,intro,fields}] (empty if no envelopes).
+    envelopePlan: function (ifaceId) {
+      if (!ENV || !ENV.has(ifaceId)) return Promise.resolve([]);
+      return ENV.fetchFor(ifaceId).then(function (data) {
+        ENV._cache = ENV._cache || {};
+        ENV._cache[ifaceId] = data;
+        return (data.envelopes || []).map(function (env) {
+          var fields = [];
+          // Core trading-partner identity, including the envelope NAME so it can
+          // be renamed for each partner/deployment.
+          ['NAME', 'SENDER_ID', 'RECEIVER_ID', 'CONTROL_NUMBER'].forEach(function (c) {
+            fields.push({
+              key: 'env.' + env.index + '.' + c,
+              label: labelFor(c),
+              hint: env.core[c] ? ('current: ' + env.core[c]) : '',
+              yn: false
+            });
+          });
+          (env.parmKeys || []).forEach(function (p) {
+            fields.push({
+              key: 'env.' + env.index + '.' + p,
+              label: labelFor(p),
+              hint: env.parms[p] ? ('current: ' + env.parms[p]) : '',
+              yn: ENV.YN.indexOf(p) >= 0
+            });
+          });
+          return {
+            id: 'env' + env.index,
+            title: 'Envelope ' + env.segment + ' \u00b7 ' + (env.name || env.type),
+            intro: 'Trading-partner ' + env.segment + ' envelope segment (from ' +
+              (data.url || 'the EDI export XML') + '). Fill in the partner values.',
+            fields: fields
+          };
+        });
+      }, function () { return []; });
+    },
+    // Apply an AI recommendation into the wizard and jump to Review.
+    applyAI: function (ifaceId, collected) {
+      if (!B.IFACES[ifaceId]) { toast('Unknown interface: ' + ifaceId, 'e'); return; }
+      S = newState(ifaceId);
+      collected = collected || {};
+      S.env = S.env || {};
+      Object.keys(collected).forEach(function (k) {
+        var v = collected[k];
+        if (v == null || v === '') return;
+        // Envelope value: key is "env.<index>.<field>".
+        var em = /^env\.(\d+)\.(.+)$/.exec(k);
+        if (em) {
+          var idx = parseInt(em[1], 10), fld = em[2];
+          S.env[idx] = S.env[idx] || {};
+          // Normalise Yes/No -> YES/NO for envelope Y/N parms.
+          if (/^(yes|no)$/i.test(v)) v = (/^yes$/i.test(v) ? 'YES' : 'NO');
+          S.env[idx][fld] = v;
+          return;
+        }
+        if (k === '__bpname__' || k === '__processname__') {
+          S.bp.name = v;
+          if (('ProcessName' in S.x)) S.x.ProcessName = v;
+        } else if (k === '__description__') {
+          S.bp.desc = v; S.bp.confDesc = v;
+        } else if (k in S.x) {
+          S.x[k] = v;
+        } else {
+          // Unknown key — stash on x so nothing is lost.
+          S.x[k] = v;
+        }
+      });
+      // Pre-fetch the envelope XML so the Review preview + zip include it.
+      if (ENV && ENV.has(ifaceId)) {
+        ENV._cache = ENV._cache || {};
+        ENV.fetchFor(ifaceId).then(function (d) {
+          ENV._cache[ifaceId] = d; renderWizard();
+        }, function () {});
+      }
+      var steps = (B.IFACES[ifaceId].steps || []);
+      S.step = Math.max(0, steps.length - 1); // Review
+      saveState();
+      location.hash = 'wizard';
+      renderWizard();
+      toast('Applied AI recommendation: ' + B.IFACES[ifaceId].title, 'g');
+    },
     copy: function (text) {
       if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { toast('Copied', 'g'); }, function () { fallbackCopy(text); });
       else fallbackCopy(text);
@@ -891,6 +1154,8 @@
         b.blocks.forEach(function (blk) { z.file(b.name + blk.file, blk.text); });
         if (hasMailbox(S.iface)) z.file(b.name + '_mailboxes.txt', b.name + ': ' + b.mailbox);
       });
+      var envXml = envOutput();
+      if (envXml) z.file(envFileName(builds[0].name), envXml);
       z.generateAsync({ type: 'blob' }).then(function (blob) {
         var a = el('a', { href: URL.createObjectURL(blob), download: (builds[0].name || 'package') + '.zip' });
         document.body.appendChild(a); a.click(); a.remove();
@@ -1020,10 +1285,21 @@
   // =====================================================================
   // BOOT
   // =====================================================================
+  function renderAI() {
+    setActive('nav-ai', 'AI Assistant', 'Describe your integration in plain English \u2014 the AI recommends an approved template and collects the details.');
+    var v = view(); v.innerHTML = '';
+    if (window.AIChat && typeof window.AIChat.mount === 'function') {
+      window.AIChat.mount(v);
+    } else {
+      v.appendChild(el('div', { class: 'al e', text: 'AI assistant failed to load (js/ai.js).' }));
+    }
+  }
+
   function wireHeader() {
     var map = {
       'nav-home': A.home, 'nav-templates': A.templates, 'nav-import': A.import,
-      'nav-analysis': A.analysis, 'nav-selftest': A.selftest, 'nav-accounts': A.accounts
+      'nav-analysis': A.analysis, 'nav-selftest': A.selftest, 'nav-accounts': A.accounts,
+      'nav-ai': A.ai
     };
     Object.keys(map).forEach(function (id) {
       var e = document.getElementById(id); if (e) e.addEventListener('click', function (ev) { ev.preventDefault(); map[id](); });

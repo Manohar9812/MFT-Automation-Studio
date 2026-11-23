@@ -1,0 +1,18 @@
+<EDIPROCESS name="APPL_OB_867_CCA_Usage_Data">
+	<ob_info>
+	    <app-archive-name><xsl:value-of select="concat('APPL_OB_867',substring-after(translate(/ProcessData/Variables/MessageName/text(), 'txt',''),'APPL_OB_867'), $DateTime,'.txt')"/></app-archive-name>
+            <app-archive-path>/mft_EDI_Archive/APPL/OB_867_4010_CCA_Usage_Data</app-archive-path>
+            <edi-archive-name><xsl:value-of select="concat('EDI_OB_867',substring-after(substring-before(/ProcessData/Variables/MessageName/text(), 'txt'),'APPL_OB_867'), $DateTime,'.txt')"/></edi-archive-name>
+            <edi-archive-path>/mft_EDI_Archive/EDI/OB_867_4010_CCA_Usage_Data</edi-archive-path>
+			<nia-archive-flag>Yes</nia-archive-flag>
+		    <nia-archive-name><xsl:value-of select="concat('EDI_OB_867',substring-after(substring-before(/ProcessData/Variables/MessageName/text(), 'txt'),'APPL_OB_867'), $DateTime,'.txt')"/></nia-archive-name>
+		    <nia-archive-path>/mft_NIA_Reporting/OB_867</nia-archive-path>	
+			<temp-file-name><xsl:value-of select="concat('APPL_OB_867_CCA_Usage_Data.',/ProcessData/MyProcess/BPDATA/WORKFLOW_ID,'.txt')"/></temp-file-name>
+			<temp-file-path>/mft/tempedi/OB/867</temp-file-path>
+			<mb-staging-name><xsl:value-of select="concat('EDI_OB_867',substring-after(substring-before(/ProcessData/Variables/MessageName/text(), 'txt'),'APPL_OB_867'), $DateTime,'.txt')"/></mb-staging-name>
+			<mb-staging-dir>/EDIStagingOutbound/OB_867_4010_CCA_Usage_Data</mb-staging-dir>
+			<mb-retransmit-name><xsl:value-of select="concat('EDI_OB_867',substring-after(substring-before(/ProcessData/Variables/MessageName/text(), 'txt'),'APPL_OB_867'), $DateTime,'.txt')"/></mb-retransmit-name>
+			<mb-retransmit-dir>/EDIRetransmit/OB_867_4010_CCA_Usage_Data</mb-retransmit-dir>
+			<map_name>SCE_OB_867_4010_GENERIC</map_name>
+	</ob_info>
+</EDIPROCESS>

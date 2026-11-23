@@ -1,0 +1,28 @@
+<PROCNAME name="SCE_OB_Enrollment_From_SCE_To_Optiwatt">
+		<process_info>
+			<CollectionFileName>*</CollectionFileName>
+			<CollectionFileExtn>.csv</CollectionFileExtn>
+			<CollectionFolder>/mftwin/Optiwatt/From SCE</CollectionFolder>
+			<ArchiveFlag>Yes</ArchiveFlag>
+			<ArchiveTimeStamp>No</ArchiveTimeStamp>
+			<ArchiveFolder>/mft/archive/General/Optiwatt</ArchiveFolder>
+			<PGPPackFlag>Yes</PGPPackFlag>
+			<public_user>0xC0CEAB01</public_user>
+			<conv_keymap_name></conv_keymap_name>
+			<secret_keymap_name></secret_keymap_name>
+			<MailBoxFileTimeStamp>No</MailBoxFileTimeStamp>
+			<MailboxPath>/Optiwatt/PickUp</MailboxPath>
+			<MailBoxFileName>unknown</MailBoxFileName>
+			<MailBoxFileExtn>.csv.pgp</MailBoxFileExtn>
+			<ExtractableCount>1</ExtractableCount>
+		</process_info>
+		<mail_info>
+			<SendSuccessMail>Yes</SendSuccessMail>
+			<SendArchiveInfo>No</SendArchiveInfo>
+			<mail-mime-sender>scemftprod@sce.com</mail-mime-sender>
+			<mail-mime-recipient>sean@optiwatt.com, matt@getoptiwatt.com, ManagedServicesMFTSupport@sce.com</mail-mime-recipient>
+			<mail-mime-cc></mail-mime-cc>
+			<mail-mime-subject></mail-mime-subject>
+			<MailName>SCE_OB_Enrollment_From_SCE_To_Optiwatt</MailName>
+		</mail_info>
+</PROCNAME>

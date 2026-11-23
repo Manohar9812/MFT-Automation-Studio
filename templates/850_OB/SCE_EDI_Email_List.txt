@@ -1,0 +1,9 @@
+<EDIMAIL name="EDI_IB_856_AS2-NubridgesVAN-Inbound">
+		<email_info>
+			<mail-format>TEXT</mail-format>
+			<mail-mime-sender>scemftprod@sce.com</mail-mime-sender>
+			<mail-mime-recipient>pisupport@sce.com</mail-mime-recipient>
+			<mail-mime-cc>scemftprod@sce.com</mail-mime-cc>
+			<mail-mime-subject>SCE_ERP_IB_9015_ASN_MFT File Received Successfully</mail-mime-subject>
+		</email_info>
+	</EDIMAIL>

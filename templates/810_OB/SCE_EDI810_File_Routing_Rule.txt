@@ -1,0 +1,202 @@
+<!--*******************************************************************************************************
+Business Object Name        : SCE_EDI810_File_Routing_Rule
+Business Object Description : This Process moves EDI 810 files from MailBox to MailBox based on the Receiver ID or DUNS number
+History:                    Author       Date          Description 
+Initial Version             Daniel      11/14/2025      initial version
+Second Version				Chaitanya   04/16/2026		Added tags for TEOCO
+Third version               Preethi        08/17/2026           Added tags for SoCal
+Copyright 2010 - Southern California Edison
+
+*******************************************************************************************************-->
+<process name="SCE_EDI810_File_Routing_Rule">
+	<rule name="IsItForCalpineDA?">
+		<condition>contains(/ProcessData/Variables/Message/MessageName/text(),'968254276')</condition>
+	</rule>
+	<rule name="IsItForIrvine?">	
+		<condition>contains(/ProcessData/Variables/Message/MessageName/text(),'IRVINE')</condition>
+	</rule>
+	<rule name="IsItForTEOCO?">	
+		<condition>contains(/ProcessData/Variables/Message/MessageName/text(),'TEOTMUSCAEP')</condition>
+	</rule> 
+	<rule name="IsItForSoCalGas?">	
+		<condition>contains(/ProcessData/Variables/Message/MessageName/text(),'0069088266005')</condition>
+	</rule>
+	<rule name="IsItForRiverisde?">	
+		<condition>contains(/ProcessData/Variables/Message/MessageName/text(),'072514789')</condition>
+	</rule>
+
+	<rule name="AnotherMessageId">
+		<condition>number(counters/positionCurrent) &lt; number(counters/positionMax)</condition>
+	</rule>	
+	<sequence name="Sequence Start">
+		<operation name="processid">
+			<participant name="BPMetaDataInfoService"/>
+			<output message="BPMetaDataServiceTypeInputMessage">
+				<assign to="." from="*"/>
+			</output>
+			<input message="inmsg">
+				<assign to="ProcessID" from="/inmsg/BPDATA/WORKFLOW_ID/text()"/>
+			</input>
+		</operation>
+		<assign name="Assign" to="counters/positionCurrent">0</assign>
+		<assign name="Assign" to="counters/positionMax" from="count(/ProcessData/RoutingRequest/RoutingRequest/MessageId)"/>
+		<choice name="AnotherMessage">
+			<select>
+				<case ref="AnotherMessageId" activity="processMessage"/>
+			</select>
+			<sequence name="processMessage">
+				<assign name="Assign" to="counters/positionCurrent" from="number(counters/positionCurrent) + 1"/>
+				<sequence name="BeginMsgExtract">
+					<operation name="QueryFile">
+						<participant name="MailboxQuery"/>
+						<output message="QueryRequest">
+							<assign to="." from="*"/>
+							<assign to="MessageId" from="string(RoutingRequest/RoutingRequest/MessageId[number(/ProcessData/counters/positionCurrent)])"/>
+							<assign to="MailboxPath">/EDIStagingOutbound/OB_810_4010_CUST_BILL</assign>
+						</output>
+						<input message="inmsg">
+							<assign to="Variables" from="*"/>
+						</input>
+					</operation>
+					<operation name="ExtractFile">
+						<participant name="MailboxExtractBegin"/>
+						<output message="MailboxExtractBeginServiceTypeInputMessage">
+							<assign to="MessageId" from="string(RoutingRequest/RoutingRequest/MessageId[number(/ProcessData/counters/positionCurrent)])"/>
+							<assign to="CommitNow">YES</assign>
+						</output>
+						<input message="inmsg">
+							<assign to="PrimaryDocument" from="PrimaryDocument/@SCIObjectID"/>
+						</input>
+					</operation>
+					<choice>
+						<select>
+						    <case ref="IsItForRiverside?" activity="SendToRiverside"/>
+						    <case ref="IsItForSoCalGas?" activity="SendToSoCalGas"/>
+							<case ref="IsItForTEOCO?" activity="SendToTEOCO"/>
+							<case ref="IsItForCalpineDA?" activity="SendToCalpineDA"/>
+							<case ref="IsItForIrvine?" activity="SendToIrvine"/>
+							<case ref="IsItForIrvine?" negative="true" activity="SendToNubridgesVAN"/>
+						</select>
+						<sequence name="SendToCalpineDA">
+							<operation name="Mailbox Add Service">
+								<participant name="MailboxAdd"/>
+								<output message="MailboxAddServiceTypeInputMessage">
+									<assign to="." from="*"/>
+									<assign to="MessageName" from="/ProcessData/Variables/Message/MessageName/text()"/>
+									<assign to="MailboxPath">/Calpine_SFTP/DA/Outbound</assign>
+								</output>
+								<input message="inmsg">
+									<assign to="." from="*"/>
+								</input>
+							</operation>
+						</sequence>
+						<sequence name="SendToIrvine">
+							<operation name="Mailbox Add Service">
+								<participant name="MailboxAdd"/>
+								<output message="MailboxAddServiceTypeInputMessage">
+									<assign to="." from="*"/>
+									<assign to="MessageName" from="/ProcessData/Variables/Message/MessageName/text()"/>
+									<assign to="MailboxPath">/IrvineCompany/Outbound</assign>
+								</output>
+								<input message="inmsg">
+									<assign to="." from="*"/>
+								</input>
+							</operation>
+						</sequence>	
+						<sequence name="SendToTEOCO">
+							<operation name="Mailbox Add Service">
+								<participant name="MailboxAdd"/>
+								<output message="MailboxAddServiceTypeInputMessage">
+									<assign to="." from="*"/>
+									<assign to="MessageName" from="/ProcessData/Variables/Message/MessageName/text()"/>
+									<assign to="MailboxPath">/TEOCO/Outbound</assign>
+								</output>
+								<input message="inmsg">
+									<assign to="." from="*"/>
+								</input>
+							</operation>
+						</sequence>		
+						<sequence name="SendToSoCalGas">
+							<operation name="Mailbox Add Service">
+								<participant name="MailboxAdd"/>
+								<output message="MailboxAddServiceTypeInputMessage">
+									<assign to="." from="*"/>
+									<assign to="MessageName" from="/ProcessData/Variables/Message/MessageName/text()"/>
+									<assign to="MailboxPath">/SoCalGas/Outbound</assign>
+								</output>
+								<input message="inmsg">
+									<assign to="." from="*"/>
+								</input>
+							</operation>
+						</sequence>	
+                        <sequence name="SendToRiverside">
+							<operation name="Mailbox Add Service">
+								<participant name="MailboxAdd"/>
+								<output message="MailboxAddServiceTypeInputMessage">
+									<assign to="." from="*"/>
+									<assign to="MessageName" from="/ProcessData/Variables/Message/MessageName/text()"/>
+									<assign to="MailboxPath">/Riverside/Outbound</assign>
+								</output>
+								<input message="inmsg">
+									<assign to="." from="*"/>
+								</input>
+							</operation>
+						</sequence>						
+						<sequence name="SendToNubridgesVAN">
+							<operation name="Mailbox Add Service">
+								<participant name="MailboxAdd"/>
+								<output message="MailboxAddServiceTypeInputMessage">
+									<assign to="." from="*"/>
+									<assign to="MessageName" from="/ProcessData/Variables/Message/MessageName/text()"/>
+									<assign to="MailboxPath">/AS2/NubridgesVAN/Outbound</assign>
+								</output>
+								<input message="inmsg">
+									<assign to="." from="*"/>
+								</input>
+							</operation>
+						</sequence>
+					</choice>
+					<operation name="DeleteFile">
+						<participant name="MailboxDelete"/>
+						<output message="DeleteRequest">
+							<assign to="MessageId" from="string(RoutingRequest/RoutingRequest/MessageId[number(/ProcessData/counters/positionCurrent)])"/>
+							<assign to="DaysOld">0</assign>
+							<assign to="MessageExtractable">All</assign>
+							<assign to="MailboxPath">/EDIStagingOutbound/OB_810_4010_CUST_BILL</assign>
+						</output>
+						<input message="inmsg">
+							<assign to="DeleteResults" from="*"/>
+						</input>
+					</operation>
+					<operation name="Release ALL">
+						<participant name="ReleaseService"/>
+						<output message="ReleaseServiceTypeInputMessage">
+							<assign to="." from="*"/>
+							<assign to="TARGET">DocumentId | MessageName | ArchiveInfo | message_to_child | TargetFileName | MessageSize | Variables</assign>
+						</output>
+						<input message="inmsg">
+							<assign to="." from="*"/>
+						</input>
+					</operation>
+				</sequence>
+				<repeat name="NextMessage" ref="AnotherMessage"/>
+			</sequence>
+		</choice>
+		<onFault>
+			<sequence name="HandleError">
+				<assign name="Assign" to="MailName">SCE_EDI810_File_Routing_Rule</assign>
+				<spawn name="Spawn" ref="SCE_Generic_EMailOnError"/>
+				<operation name="BPException">
+					<participant name="BPExceptionService"/>
+					<output message="BPExceptionServiceTypeInputMessage">
+						<assign to="exceptionCode">ERROR</assign>
+						<assign to="." from="*"/>
+					</output>
+					<input message="inmsg">
+						<assign to="." from="*"/>
+					</input>
+				</operation>
+			</sequence>
+		</onFault>
+	</sequence>
+</process>
